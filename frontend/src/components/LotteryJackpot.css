@@ -1,0 +1,29 @@
+.lottery-title {
+    margin-top: 5px;
+  }
+
+  @media (max-width: 1280px ) {
+    .lottery-title {
+        font-size: 30px !important;
+        margin-top: 5px!important;
+        padding: 0 1rem;
+    }
+
+    .lottery-container{
+        padding-top: 50px !important;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .lottery-title {
+        font-size: 25px !important;
+        margin-top: 5px!important;
+        padding: 0 1rem;
+    }
+
+    .lottery-container{
+        padding-top: 50px !important;
+    }
+  }
+  
+  
