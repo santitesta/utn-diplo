@@ -2,8 +2,11 @@
 pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
 
-contract QuiniBlockContract is Ownable{
+import "./QuiniBlockUtils.sol";
+
+contract QuiniBlockContract is Ownable, Pausable, QuiniBlockUtils {
     struct Ticket {
         uint32[6] chosenNumbers;
         address buyer;
@@ -36,7 +39,9 @@ contract QuiniBlockContract is Ownable{
     constructor(address initialOwner) Ownable(initialOwner) {}
 
     // Function to purchase a ticket
-    function purchaseTicket( uint32[6] memory _chosenNumbers) public {
+    function purchaseTicket(uint32[6] memory _chosenNumbers) public payable whenNotPaused {
+        // Check if the sent value is equal to the ticket price
+        require(msg.value == ticketPrice, "Incorrect Ether value sent");
         require(currentDrawId > 0, "No draw has been initiated yet");
         require(areValidNumbers(_chosenNumbers), "Chosen numbers must be between 0 and 45");
         require(draws[currentDrawId].drawDate == 0, "No active draw with the current draw ID");
@@ -53,29 +58,37 @@ contract QuiniBlockContract is Ownable{
     }
 
     // Function to start a new draw
-    function startDraw(uint256 _primaryPotValue, uint256 _secondaryPotValue) public onlyOwner {
+    function startDraw(uint256 _primaryPotValue, uint256 _secondaryPotValue) public onlyOwner whenNotPaused {
         require(_primaryPotValue > 0 , "Requires that the primary Pot not be null");
         currentDrawId++;
-        setPotValues(_primaryPotValue,_secondaryPotValue);
-        emit DrawStarted(currentDrawId,_primaryPotValue);
+        setPotValues(_primaryPotValue, _secondaryPotValue);
+        emit DrawStarted(currentDrawId, _primaryPotValue);
     }
 
     // Function that issues the draw and distributes the prize
-    function emitDraw(uint32[6] memory _winningNumbers) public onlyOwner(){
+    function emitDraw(uint32[6] memory _winningNumbers) public onlyOwner whenNotPaused {
         require(areValidNumbers(_winningNumbers), "Winning numbers must be between 0 and 45");
-        //buscar a los ganadores con los numeros
-        address[] memory myWinners  = findWinners(currentDrawId,_winningNumbers); // Inicializar como dirección nula
+        // Buscar a los ganadores con los números
+        address[] memory myWinners  = findWinners(currentDrawId, _winningNumbers); // Inicializar como dirección nula
 
-        
         draws[currentDrawId] = Draw({
             winningNumbers: _winningNumbers,
             drawDate: block.timestamp,
             winners : myWinners
         });
 
-        //si hay ganadores deberia transferir el pozo al ganador o ganadores
+        //transfiere los fondos
+        if (myWinners.length > 0) {
+            uint256 prize = primaryPotValue / myWinners.length;
+            for (uint32 i = 0; i < myWinners.length; i++) {
+                (bool success, ) = myWinners[i].call{value: prize}("");
+                require(success, "Transfer to winner failed");
+            }
+            primaryPotValue = 0; // Reset primary pot after distribution
+        }
 
-        emit DrawDone(currentDrawId,block.timestamp,_winningNumbers,myWinners);
+        //falta ajustar los pozo para el siguiente sorteo
+        emit DrawDone(currentDrawId, block.timestamp, _winningNumbers, myWinners);
     }
 
     // Function to see the result of a draw
@@ -87,32 +100,7 @@ contract QuiniBlockContract is Ownable{
     function setPotValues(uint256 _primaryPotValue, uint256 _secondaryPotValue) public onlyOwner {
         primaryPotValue = _primaryPotValue;
         secondaryPotValue = _secondaryPotValue;
-        emit SetPotValues(primaryPotValue,secondaryPotValue);
-    }
-
-    // Function to check if numbers are unique
-    function areUniqueNumbers(uint32[6] memory numbers) internal pure returns (bool) {
-        require(numbers.length == 6, "Invalid number of chosen numbers");
-        for (uint8 i = 0; i < numbers.length; i++) {
-            for (uint8 j = i + 1; j < numbers.length; j++) {
-                if (numbers[i] == numbers[j]) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    // Function to check if numbers are within the valid range
-    function areValidNumbers(uint32[6] memory numbers) internal pure returns (bool) {
-        require(areUniqueNumbers(numbers), "The Numbers must be unique");
-
-        for (uint8 i = 0; i < numbers.length; i++) {
-            if (numbers[i] < 0 || numbers[i] > 45) {
-                return false;
-            }
-        }
-        return true;
+        emit SetPotValues(primaryPotValue, secondaryPotValue);
     }
 
     // Function to get the chosen numbers of a ticket
@@ -140,27 +128,13 @@ contract QuiniBlockContract is Ownable{
         return winners;
     }
 
-    // Function to compare two sets of numbers
-    function compareNumbers(uint32[6] memory numbers1, uint32[6] memory numbers2) internal pure returns (bool) {
-        for (uint8 i = 0; i < numbers1.length; i++) {
-            if (numbers1[i] != numbers2[i]) {
-                return false;
-            }
-        }
-        return true;
+    // Function to pause the contract
+    function pause() public onlyOwner {
+        _pause();
     }
 
-    // Function to order the chosen numbers in ascending order
-    function orderNumbers(uint32[6] memory numbers) private pure returns (uint32[6] memory) {
-        for (uint i = 0; i < numbers.length - 1; i++) {
-            for (uint j = i + 1; j < numbers.length; j++) {
-                if (numbers[i] > numbers[j]) {
-                    uint32 temp = numbers[i];
-                    numbers[i] = numbers[j];
-                    numbers[j] = temp;
-                }
-            }
-        }
-        return numbers;
+    // Function to unpause the contract
+    function unpause() public onlyOwner {
+        _unpause();
     }
 }
