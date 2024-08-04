@@ -107,7 +107,10 @@ Hice un test que seria una prueba generar para un sorteo
     npx hardhat test --grep "TestIntegral"
 
     
-  
+Tambien se genera una archivo con la address del contrato, que para probar todo el test es mejor borrarla, asi que se puede ejecutar asi
+
+    rm .\test\contractAddress.txt; npx hardhat test --grep "TestIntegral"
+
 
 ## Contribuciones
 

@@ -4,7 +4,9 @@ pragma solidity ^0.8.24;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Pausable.sol";
 
-contract QuiniBlockPotManager is Ownable, Pausable {
+import "./QuiniBlockUtils.sol";
+
+contract QuiniBlockPotManager is Ownable, Pausable, QuiniBlockUtils {
     uint256 public primaryPot;
     uint256 public secondaryPot;
     uint256 public reservePot;
@@ -14,22 +16,28 @@ contract QuiniBlockPotManager is Ownable, Pausable {
     uint8 public secondaryPotPercentage;
     uint8 public reservePotPercentage;
 
-    event PotValuesSet(uint256 primaryPot, uint256 secondaryPot, uint256 reservePot);
-    event PotPercentagesSet(uint8 primaryPotPercentage, uint8 secondaryPotPercentage, uint8 reservePotPercentage);
-    event PotIncremented(uint256 totalIncrement, uint256 primaryIncrement, uint256 secondaryIncrement, uint256 reserveIncrement);
-    event PrimaryPotReset(uint256 newPrimaryPot, uint256 newSecondaryPot);
+    event SetPotValues(uint256 primaryPot, uint256 secondaryPot, uint256 reservePot);
+    event SetPotPercentages(uint8 primaryPotPercentage, uint8 secondaryPotPercentage, uint8 reservePotPercentage);
+    event IncrementedPot(uint256 totalIncrement, uint256 primaryIncrement, uint256 secondaryIncrement, uint256 reserveIncrement);
+    event ResetPrimaryPot(uint256 newPrimaryPot, uint256 newSecondaryPot);
+
+    modifier isPrimaryPotAvailable(){
+        require(primaryPot > 0, "An available primary well is required.");
+        _;
+    }
 
     constructor(uint256 _basePotValue, address initialOwner) Ownable(initialOwner) {
         basePotValue = _basePotValue;
         primaryPot = basePotValue;
     }
 
+    
     // Para establecer los valores de cada pozo.
     function setPotValues(uint256 _primaryPot, uint256 _secondaryPot, uint256 _reservePot) public onlyOwner whenNotPaused {
         primaryPot = _primaryPot;
         secondaryPot = _secondaryPot;
         reservePot = _reservePot;
-        emit PotValuesSet(primaryPot, secondaryPot, reservePot);
+        emit SetPotValues(primaryPot, secondaryPot, reservePot);
     }
 
     // Para asignar porcentajes a cada pozo, asegurándose de que la suma de los porcentajes sea 100.
@@ -38,11 +46,11 @@ contract QuiniBlockPotManager is Ownable, Pausable {
         primaryPotPercentage = _primaryPotPercentage;
         secondaryPotPercentage = _secondaryPotPercentage;
         reservePotPercentage = _reservePotPercentage;
-        emit PotPercentagesSet(primaryPotPercentage, secondaryPotPercentage, reservePotPercentage);
+        emit SetPotPercentages(primaryPotPercentage, secondaryPotPercentage, reservePotPercentage);
     }
 
     // Para incrementar los pozos según los porcentajes establecidos.
-    function incrementPots(uint256 totalIncrement) public onlyOwner whenNotPaused {
+    function incrementPots(uint256 totalIncrement) internal {
         uint256 primaryIncrement = (totalIncrement * primaryPotPercentage) / 100;
         uint256 secondaryIncrement = (totalIncrement * secondaryPotPercentage) / 100;
         uint256 reserveIncrement = (totalIncrement * reservePotPercentage) / 100;
@@ -51,7 +59,7 @@ contract QuiniBlockPotManager is Ownable, Pausable {
         secondaryPot += secondaryIncrement;
         reservePot += reserveIncrement;
 
-        emit PotIncremented(totalIncrement, primaryIncrement, secondaryIncrement, reserveIncrement);
+        emit IncrementedPot(totalIncrement, primaryIncrement, secondaryIncrement, reserveIncrement);
     }
 
     // Funciones para validar que haya suficientes fondos en cada pozo.
@@ -80,12 +88,23 @@ contract QuiniBlockPotManager is Ownable, Pausable {
         uint256 difference = primaryPot - basePotValue;
         primaryPot = basePotValue;
         secondaryPot -= difference;
-        emit PrimaryPotReset(primaryPot, secondaryPot);
+        emit ResetPrimaryPot(primaryPot, secondaryPot);
     }
 
     // Para establecer el valor base del pozo primario.
     function setBasePotValue(uint256 _basePotValue) public onlyOwner whenNotPaused {
         basePotValue = _basePotValue;
+    }
+
+    
+    // Function to pause the contract
+    function pause() public onlyOwner {
+        _pause();
+    }
+
+    // Function to unpause the contract
+    function unpause() public onlyOwner {
+        _unpause();
     }
 
     // Función para recibir fondos en el contrato.

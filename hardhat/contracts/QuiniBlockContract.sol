@@ -1,12 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/Pausable.sol";
+import "./QuiniBlockPotManager.sol";
 
-import "./QuiniBlockUtils.sol";
-
-contract QuiniBlockContract is Ownable, Pausable, QuiniBlockUtils {
+contract QuiniBlockContract is QuiniBlockPotManager {
     struct Ticket {
         uint32[6] chosenNumbers;
         address buyer;
@@ -19,28 +16,26 @@ contract QuiniBlockContract is Ownable, Pausable, QuiniBlockUtils {
         address[] winners;
     }
 
-    uint256 public primaryPotValue;
-    uint256 public secondaryPotValue;
-    uint256 public ticketPrice = 0.001 ether;
+    uint256 public ticketPrice = 0.001 ether; //trabajar en wei
 
     mapping(uint32 => Ticket) public tickets;
     uint32 public ticketCount;
 
     mapping(uint32 => Draw) public draws;
-    uint32 public currentDrawId;
+    uint32 public currentDrawId = 0;
 
     // Events
-    event SetPotValues(uint256 _primaryPotValue, uint256 _secondaryPotValue);
-    event DrawStarted(uint32 drawId,uint256 _primaryPotValue);
+    event DrawStarted(uint32 drawId,uint256 _primaryPot);
     event TicketPurchased(uint32 ticketId, uint32 drawId, address buyer); // Modified event
     event DrawDone(uint32 drawId,  uint256 drawDate,uint32[6] winningNumbers,address[] winners);
+    event SetTicketPrice(uint256 _ticketPriceInWei);
 
     //constructor for Ownable
-    constructor(address initialOwner) Ownable(initialOwner) {}
+    constructor(uint256 _basePotValue, address initialOwner) QuiniBlockPotManager(_basePotValue,initialOwner) {}
 
     // Function to purchase a ticket
     function purchaseTicket(uint32[6] memory _chosenNumbers) public payable whenNotPaused {
-        // Check if the sent value is equal to the ticket price
+        // // Check if the sent value is equal to the ticket price
         require(msg.value == ticketPrice, "Incorrect Ether value sent");
         require(currentDrawId > 0, "No draw has been initiated yet");
         require(areValidNumbers(_chosenNumbers), "Chosen numbers must be between 0 and 45");
@@ -55,14 +50,14 @@ contract QuiniBlockContract is Ownable, Pausable, QuiniBlockUtils {
 
         emit TicketPurchased(ticketCount, currentDrawId, msg.sender); // Emit modified event
         ticketCount++;
+        // //incremento los pozos
+        incrementPots(ticketPrice);
     }
 
     // Function to start a new draw
-    function startDraw(uint256 _primaryPotValue, uint256 _secondaryPotValue) public onlyOwner whenNotPaused {
-        require(_primaryPotValue > 0 , "Requires that the primary Pot not be null");
+    function startDraw() public onlyOwner whenNotPaused isPrimaryPotAvailable{
         currentDrawId++;
-        setPotValues(_primaryPotValue, _secondaryPotValue);
-        emit DrawStarted(currentDrawId, _primaryPotValue);
+        emit DrawStarted(currentDrawId, primaryPot);
     }
 
     // Function that issues the draw and distributes the prize
@@ -79,12 +74,13 @@ contract QuiniBlockContract is Ownable, Pausable, QuiniBlockUtils {
 
         //transfiere los fondos
         if (myWinners.length > 0) {
-            uint256 prize = primaryPotValue / myWinners.length;
+            uint256 prize = primaryPot / myWinners.length;
             for (uint32 i = 0; i < myWinners.length; i++) {
                 (bool success, ) = myWinners[i].call{value: prize}("");
                 require(success, "Transfer to winner failed");
             }
-            primaryPotValue = 0; // Reset primary pot after distribution
+
+            resetPrimaryPot();// Reset primary pot after distribution
         }
 
         //falta ajustar los pozo para el siguiente sorteo
@@ -96,11 +92,11 @@ contract QuiniBlockContract is Ownable, Pausable, QuiniBlockUtils {
         return draws[_drawId];
     }
 
-    // Function to set contract info
-    function setPotValues(uint256 _primaryPotValue, uint256 _secondaryPotValue) public onlyOwner {
-        primaryPotValue = _primaryPotValue;
-        secondaryPotValue = _secondaryPotValue;
-        emit SetPotValues(primaryPotValue, secondaryPotValue);
+    // Function to set el precio de ticketen wei
+    function setTicketPrice(uint256 _ticketPriceInWei) public onlyOwner {
+        require(_ticketPriceInWei > 0, "El precio del ticket debe ser mayor que 0");
+        ticketPrice = _ticketPriceInWei;
+        emit SetTicketPrice(_ticketPriceInWei);
     }
 
     // Function to get the chosen numbers of a ticket
@@ -112,9 +108,9 @@ contract QuiniBlockContract is Ownable, Pausable, QuiniBlockUtils {
     function findWinners(uint32 _drawId, uint32[6] memory _winningNumbers) private view returns (address[] memory) {
         address[] memory tempWinners = new address[](ticketCount);
         uint32 winnerCount = 0;
-
+        uint32[6] memory _winningOrderNumbers = orderNumbers(_winningNumbers);
         for (uint32 i = 0; i < ticketCount; i++) {
-            if (tickets[i].drawId == _drawId && compareNumbers(tickets[i].chosenNumbers, _winningNumbers)) {
+            if (tickets[i].drawId == _drawId && compareNumbers(tickets[i].chosenNumbers, _winningOrderNumbers)) {
                 tempWinners[winnerCount] = tickets[i].buyer;
                 winnerCount++;
             }
@@ -128,13 +124,4 @@ contract QuiniBlockContract is Ownable, Pausable, QuiniBlockUtils {
         return winners;
     }
 
-    // Function to pause the contract
-    function pause() public onlyOwner {
-        _pause();
-    }
-
-    // Function to unpause the contract
-    function unpause() public onlyOwner {
-        _unpause();
-    }
 }
