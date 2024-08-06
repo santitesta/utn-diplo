@@ -7,7 +7,10 @@ const { ethers } = require('ethers');
 const path = require('path'); // Para manejar rutas
 
 // Configurar conexión a Ganache
+<<<<<<< HEAD
+=======
 // const provider = new ethers.providers.JsonRpcProvider('http://127.0.0.1:7545');
+>>>>>>> 48ecbb470cfef2b083e78a532ccd3e324272a275
 const url = 'http://127.0.0.1:7545';
 const provider = new ethers.JsonRpcProvider(url);
 

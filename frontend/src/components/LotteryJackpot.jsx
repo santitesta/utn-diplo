@@ -107,7 +107,7 @@ const LotteryJackpot = ({ className }) => {
     <AppContainer className={className}>
       <Container className="lottery-container">
         {digits.map((digit, i) => (
-          <DigitBox className="lottery-numbers" key={i} value={digit} />
+          <DigitBox className="lottery-numbers" key={i} value={parseInt(digit, 10)} />
         ))}
         <PozoText className="lottery-title">Pozo del Proximo Sorteo (WEI):</PozoText>
       </Container>
