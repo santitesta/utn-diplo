@@ -4,8 +4,6 @@ import PropTypes from 'prop-types';
 import Form from 'react-bootstrap/Form';
 import Card from 'react-bootstrap/Card';
 
-
-
 function CardContrato({ contrato }) {
     const PrintInfo = (title, value) => {
         const controlId = `contrato.${title.replace(/\s+/g, '')}`; // Elimina todos los espacios en blanco
@@ -49,6 +47,6 @@ function CardContrato({ contrato }) {
 
 // Definir PropTypes para la validación de los props
 CardContrato.propTypes = {
-    contrato: PropTypes.object.isRequired, // Asegura que title es una cadena y es requerido
+    contrato: PropTypes.array.isRequired, // Asegura que title es una cadena y es requerido
 };
 export default CardContrato;

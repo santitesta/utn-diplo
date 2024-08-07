@@ -9,14 +9,19 @@ import Table from 'react-bootstrap/Table';
 function CardInfoSorteo({ sorteo }) {
     const [activo, setActivo] = useState(false); 
     const [anterior, setAnterior] = useState([]); 
-
+    const [anteriorNumeros, setAnteriorNumeros] = useState([]); 
 
     useEffect(()=>{
-        const numero = sorteo.numero??-1;
-        const anterior = sorteo.anterior??0;
-        setAnterior(sorteo.anterior);
-        const activo = (numero>anterior.numero);
-        setActivo(activo);
+        console.log(sorteo);
+        if(sorteo != []){
+            const numero = sorteo.numero??-1;
+            const anterior = sorteo.anterior??0;
+            setAnterior(sorteo.anterior);
+            setAnteriorNumeros(sorteo.anterior?.winningNumbers);
+            console.log(`anterior: ${JSON.stringify(anterior, null, 2)}`);
+            const activo = (numero>anterior.numero);
+            setActivo(activo);
+        }
     },[sorteo]) ;
 
     const PrintInfo = (title, value) => {
@@ -49,9 +54,10 @@ function CardInfoSorteo({ sorteo }) {
                             />
                         </Form.Group>
                     </Col> 
-               </Row>          
+                </Row>          
+                {anterior &&
                 <Row>
-                <Form.Group className="mb-3"controlId={"sorteos"}>
+                    <Form.Group className="mb-3"controlId={"sorteos"}>
                     <Form.Label>Ultimo Sorteo:</Form.Label>
                         <Table responsive>
                             <thead>
@@ -66,14 +72,13 @@ function CardInfoSorteo({ sorteo }) {
                                 <tr>
                                     <td>{anterior.numero}</td>
                                     <td>{anterior.drawDate}</td>
-                                    <td>{anterior.winningNumbers.join(', ')}</td>
-                                    {/* falta verificar que si es nulo queda Vacante */}
-                                    <td>{anterior.winners.join(', ')}</td>
+                                    <td>{anteriorNumeros.join(', ') }</td>
+                                    <td>{Array.isArray(anterior.winners) ? anterior.winners.join(', ') : 'Vacante'}</td>
                                 </tr>
                             </tbody>
                         </Table>
                     </Form.Group>
-                </Row>
+                </Row>}
             </Form>
         </Card>
     );
@@ -81,6 +86,6 @@ function CardInfoSorteo({ sorteo }) {
 
 // Definir PropTypes para la validación de los props
 CardInfoSorteo.propTypes = {
-    sorteo: PropTypes.object.isRequired, // Asegura que title es una cadena y es requerido
+    sorteo: PropTypes.array.isRequired, // Asegura que title es una cadena y es requerido
 };
 export default CardInfoSorteo;

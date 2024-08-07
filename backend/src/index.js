@@ -1,16 +1,16 @@
 const express = require('express')
-const app = express()
+const cors = require('cors');
+const app = express();
 const port = 3000
+// Configura CORS para permitir solicitudes desde cualquier origen
+app.use(cors());
 
 /*  Configuracion para interacutuar con un SmartContract */
 const { ethers } = require('ethers');
 const path = require('path'); // Para manejar rutas
 
 // Configurar conexión a Ganache
-<<<<<<< HEAD
-=======
 // const provider = new ethers.providers.JsonRpcProvider('http://127.0.0.1:7545');
->>>>>>> 48ecbb470cfef2b083e78a532ccd3e324272a275
 const url = 'http://127.0.0.1:7545';
 const provider = new ethers.JsonRpcProvider(url);
 
@@ -19,7 +19,7 @@ const provider = new ethers.JsonRpcProvider(url);
 const contractJson = require('C:/Users/Enzo Meoniz/Desktop/CursoBlockchain/utn-diplo/hardhat/artifacts/contracts/QuiniBlockContract.sol/QuiniBlockContract.json');
 const contractABI = contractJson.abi; // Extraer solo la ABI
 
-const contractAddress = '0xD1cacA268717E48B610f0BBFddca057d70c16C29';
+const contractAddress = '0x62B3c6193ac12b8eb9988bDc16485502ab72eda2';
 
 // Crear una instancia del contrato
 const contract = new ethers.Contract(contractAddress, contractABI, provider);

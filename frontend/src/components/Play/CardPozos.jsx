@@ -39,6 +39,6 @@ function CardPozos({ pozos }) {
 
 // Definir PropTypes para la validación de los props
 CardPozos.propTypes = {
-    pozos: PropTypes.object.isRequired, // Asegura que title es una cadena y es requerido
+    pozos: PropTypes.array.isRequired, // Asegura que title es una cadena y es requerido
 };
 export default CardPozos;

@@ -17,35 +17,36 @@ function InformacionContrato() {
     },[]) 
 
     const requestInformation =()=>{
-        const baseURL = 'http://127.0.0.1:3000/estadoContrato'
+        const baseURL = 'http://127.0.0.1:3000/estadoContrato';
         axios.get(baseURL,{
             headers: {
                 'Content-Type': 'application/json', 
             },
         }).then((response) => {
-            const data=response.data
-            console.log(data)
-            const contrato = data.contrato
-            setoContrato(contrato)
-            const pozos = data.pozo
-            setoPozos(pozos)
-            const sorteo = data.sorteo
-            setSorteo(sorteo)
+            const data=response.data;
+            // console.log(`data: ${JSON.stringify(data, null, 2)}`);
+            const contrato = data.contrato;
+            // console.log(`contrato: ${contrato} `);
+            setoContrato(contrato);
+            const pozos = data.pozo;
+            setoPozos(pozos);
+            const sorteo = data.sorteo;
+            setSorteo(sorteo);
             
         })
         .catch(
             function (error) {
-                console.log(error)
-                alert('fallo la solicitud de datos. '+ error)
+                console.log(error);
+                alert('fallo la solicitud de datos. '+ error);
             }
         );
     }
     
     return (
         <>
-            <CardInfoSorteo sorteo={sorteo}/>
-            <CardContrato contrato={contrato}/>
-            <CardPozos pozos={pozos}/>
+            {sorteo && <CardInfoSorteo sorteo={sorteo}/>}
+            {contrato && <CardContrato contrato={contrato}/>}
+            {pozos &&<CardPozos pozos={pozos}/> }
         </>
   );
 }

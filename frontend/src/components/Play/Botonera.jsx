@@ -1,19 +1,9 @@
 import { useState } from "react";
-<<<<<<< HEAD
-import {  Button } from "react-bootstrap";
-=======
 import { Col, Row, Button } from "react-bootstrap";
->>>>>>> 48ecbb470cfef2b083e78a532ccd3e324272a275
-
 import CardTicket from "./CardTicket";
 import CardSorteo from "./CardSorteo";
+import InformacionContrato from "./InformacionContrato";
 
-<<<<<<< HEAD
-=======
-import axios from 'axios';
-
-
->>>>>>> 48ecbb470cfef2b083e78a532ccd3e324272a275
 function Botonera() {
 
     const [pozoPrimario, setPozoPrimario] = useState(0); // Estado para rastrear los valores de los inputs
@@ -57,13 +47,8 @@ function Botonera() {
     };
 
   return (
-<<<<<<< HEAD
-
-        <>
-=======
-    <Row aria-colspan={2}  className="m-2">
+    <Row>
         <Col className="d-grid gap-2">
->>>>>>> 48ecbb470cfef2b083e78a532ccd3e324272a275
             <Button variant="outline-warning" onClick={handleLogin}>Conectar Wallet</Button>
             {address && <p>Address Conectada: {address}</p>}
             <hr/>
@@ -72,15 +57,8 @@ function Botonera() {
             <CardTicket count={6} title={"Ticket"} buttonText={"Comprar Ticket"} handleButton= {()=> handleComprarTicket()} numeros={numeros} setNumeros ={(x)=>setNumeros(x)}/>
             <hr/>
             <CardTicket count={6} variant="outline-success" title={"Ganador"} buttonText={"Fin Sorteo"} handleButton= {()=> handleFinSorteo()} numeros={numerosGanadores} setNumeros ={(x)=>setNumerosGanadores(x)}/>
-<<<<<<< HEAD
-        </>
-       
-=======
-        </Col>
-        <Col>
         </Col>
     </Row>
->>>>>>> 48ecbb470cfef2b083e78a532ccd3e324272a275
   );
 }
 
