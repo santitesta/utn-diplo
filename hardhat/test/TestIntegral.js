@@ -9,6 +9,8 @@ describe("TestIntegral", function () {
     let owner;
     let addr1;
     let addr2;
+    let addr3;
+    let addr4;
 
     // const chosenNumbers1 = [1, 2, 3, 4, 5, 6];
     // const chosenNumbers2 = [5, 6, 7, 8, 9, 10];
@@ -100,23 +102,35 @@ describe("TestIntegral", function () {
     }
     
     async function printBalances(momento){
-        console.log(`\n########################## SALDOS ${momento} ##########################`);
+        console.log('\x1b[34m%s\x1b[0m',`\n############################## SALDOS ${momento} ##############################`);
         //Ver balances en el contrato y address luego de comprar
-        const balanceAfter  = await ethers.provider.getBalance(addr1.address);
-        console.log(`Balance de ${addr1.address} : ${ethers.utils.formatEther(balanceAfter )} ETH`);
-
-        const balanceAfter2 = await ethers.provider.getBalance(addr2.address);
-        console.log('\x1b[35m%s\x1b[0m',`Balance de ${addr2.address} : ${ethers.utils.formatEther(balanceAfter2)} ETH`); //Lo imprimo en color para diferenciar el ganador y sus saldos
- 
-        // Obtener el saldo del contrato antes de la compra
-        const contractBalanceAfter  = await ethers.provider.getBalance(quiniBlock.address);
-        console.log(`Balance del contrato : ${ethers.utils.formatEther(contractBalanceAfter )} ETH`);
-        console.log('############################################################\n\n');
+        const addresses = [
+            { label: 'contrato', address: quiniBlock.address }, 
+            { label: 'addr1', address: addr1.address },
+            { label: 'addr2', address: addr2.address },
+            { label: 'addr3', address: addr3.address },
+            { label: 'addr4', address: addr4.address }
+        ];
+    
+        for (let i = 0; i < addresses.length; i++) {
+            const balance = await ethers.provider.getBalance(addresses[i].address);
+            const label = addresses[i].label === 'contrato' ? 'Balance del contrato' : `Balance de ${addresses[i].address}`;
+            let colorCode;
+            if (addresses[i].label === 'contrato') {
+                colorCode = '\x1b[31m%s\x1b[0m'; // Rojo para el contrato
+            } else if (i === 2 || i === 4) {
+                colorCode = '\x1b[35m%s\x1b[0m'; // Magenta para addr2 y addr4
+            } else {
+                colorCode = '%s'; // Sin color para el resto
+            }
+            console.log(colorCode, `${label} : ${ethers.utils.formatEther(balance)} ETH`);
+        }
+        console.log('\x1b[34m%s\x1b[0m','#################################################################################\n\n');
     }
 
     it("1. Inicio el sorteo. Compro varios tickets, sorteo con pozo vacante", async function () {
 
-        [owner, addr1, addr2] = await ethers.getSigners();
+        [owner, addr1, addr2, addr3, addr4] = await ethers.getSigners();
       
 
         // Iniciamos un sorteo
@@ -160,7 +174,7 @@ describe("TestIntegral", function () {
 
     it("2. Inicio el sorteo. Compro varios tickets, sorteo con 1 ganador", async function () {
 
-        [owner, addr1, addr2] = await ethers.getSigners();
+        [owner, addr1, addr2, addr3, addr4] = await ethers.getSigners();
       
 
         // Iniciamos un sorteo
@@ -206,4 +220,83 @@ describe("TestIntegral", function () {
 
 
     
+    it("3. Comprar mas ticket y dejar el sorteo abierto", async function () {
+
+        [owner, addr1, addr2, addr3, addr4] = await ethers.getSigners();
+      
+
+        // Iniciamos un sorteo
+        let currentDrawId;
+
+        try {
+            // Intentamos iniciar un sorteo
+            await quiniBlock.startDraw(); 
+            currentDrawId = await quiniBlock.currentDrawId();
+            console.log(`Se inició el sorteo: ${currentDrawId}`);
+        } catch (error) {
+            // Si falla, significa que ya hay un sorteo activo
+            currentDrawId = await quiniBlock.currentDrawId();
+            console.log(`Existe sorteo activo: ${currentDrawId}`);
+        }
+
+        const winnerNumber = generateUniqueNumbers();
+        
+        await printBalances("INICIO");
+
+        //Ahora pasamos al proceso de compra
+        await purchaseTicket(addr1, generateUniqueNumbers(), ticketPrice);        
+        await purchaseTicket(addr2, generateUniqueNumbers(), ticketPrice);
+        await purchaseTicket(addr2, generateUniqueNumbers(), ticketPrice); 
+        await purchaseTicket(addr3, generateUniqueNumbers(), ticketPrice);        
+        await purchaseTicket(addr3, generateUniqueNumbers(), ticketPrice);
+        await purchaseTicket(addr4, generateUniqueNumbers(), ticketPrice); 
+
+        await printBalances("DESPUES DE COMPRAR");
+        
+    });
+    it("4. Finalizar Sorteo", async function () {
+        [owner, addr1, addr2, addr3, addr4] = await ethers.getSigners();
+    
+        const winnerNumber = generateUniqueNumbers();
+        
+        let currentDrawId = await quiniBlock.currentDrawId();
+        const pozo = await quiniBlock.primaryPot();
+        const pozo1_eth = ethers.utils.formatEther(pozo);
+    
+        try {
+            // Intentamos finalizar el sorteo actual
+            const tx_draw = await quiniBlock.emitDraw(winnerNumber);
+            console.log(`Finalizo el sorteo: ${currentDrawId}`);
+        } catch (error) {
+            // Si falla, capturamos el error y verificamos que es porque no hay sorteos activos
+            if (error.message.includes("No active draw in progress")) {
+                const message = 'No hay sorteos activos. Verificando el último sorteo.';
+                console.log('\x1b[31m%s\x1b[0m','#'.repeat(message.length))
+                console.log('\x1b[31m%s\x1b[0m',message);
+                console.log('\x1b[31m%s\x1b[0m','#'.repeat(message.length))
+                currentDrawId = currentDrawId-1; // Restamos 1 para verificar el sorteo anterior
+            } else {
+                // Si es otro tipo de error, lanzamos la excepción
+                throw error;
+            }
+        }
+    
+        const ganadores = await quiniBlock.getDraw(currentDrawId);
+        const cantGanadores = ganadores.winners.length;
+        console.log(`Pozo Primario: ${pozo1_eth} Eth`);
+    
+        if (cantGanadores > 0) {
+            const division = pozo.div(cantGanadores);
+            const pozo_eth = ethers.utils.formatEther(division);
+            console.log(`El sorteo reparte: ${pozo_eth} ETH por ganador`);
+            console.log('\x1b[36m%s\x1b[0m', `Hubo ${cantGanadores} Ganadores`);
+            console.log(ganadores.winners);
+        } else {
+            console.log('\x1b[31m%s\x1b[0m', `No hubo Ganadores. Pozo vacante`);
+        }
+    
+        await printBalances("AL FINALIZAR");
+    });
+    
+
 });

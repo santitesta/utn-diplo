@@ -22,7 +22,9 @@ contract QuiniBlockContract is QuiniBlockPotManager {
     uint32 public ticketCount;
 
     mapping(uint32 => Draw) public draws;
-    uint32 public currentDrawId = 0;
+    uint32 public currentDrawId = 1;
+
+    bool public isDrawActive = false;
 
     // Events
     event DrawStarted(uint32 drawId,uint256 _primaryPot);
@@ -56,12 +58,14 @@ contract QuiniBlockContract is QuiniBlockPotManager {
 
     // Function to start a new draw
     function startDraw() public onlyOwner whenNotPaused isPrimaryPotAvailable{
-        currentDrawId++;
+        require(!isDrawActive, "There is already an active draw in progress"); // Verifica si hay un sorteo activo
+        isDrawActive = true; // Marca el sorteo como activo        currentDrawId++;
         emit DrawStarted(currentDrawId, primaryPot);
     }
 
     // Function that issues the draw and distributes the prize
     function emitDraw(uint32[6] memory _winningNumbers) public onlyOwner whenNotPaused {
+        require(isDrawActive, "No active draw in progress"); // Verifica que hay un sorteo activo
         require(areValidNumbers(_winningNumbers), "Winning numbers must be between 0 and 45");
         // Buscar a los ganadores con los números
         address[] memory myWinners  = findWinners(currentDrawId, _winningNumbers); // Inicializar como dirección nula
@@ -85,6 +89,8 @@ contract QuiniBlockContract is QuiniBlockPotManager {
 
         //falta ajustar los pozo para el siguiente sorteo
         emit DrawDone(currentDrawId, block.timestamp, _winningNumbers, myWinners);
+        isDrawActive = false; // Marca el sorteo como finalizado
+        currentDrawId++; // Incrementa el ID del sorteo para el próximo sorteo
     }
 
     // Function to see the result of a draw
