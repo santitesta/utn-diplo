@@ -36,11 +36,11 @@ function CardInfoSorteo({ sorteo }) {
 
     return (
         <Card>
-            <Card.Header className="bg-primary text-white">Pozos</Card.Header>
+            <Card.Header className="bg-primary text-white">Sorteos</Card.Header>
             <Form className="p-1">
                 <Row>
                     <Col xs={6} className="d-flex justify-content-center">
-                        {PrintInfo("Actual", `${sorteo?.numero} Eth`)}
+                        {PrintInfo("Actual", `${sorteo?.numero}`)}
                     </Col>
                     <Col xs={6} className="d-flex justify-content-center">
                         <Form.Group className="mb-3" >

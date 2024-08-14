@@ -44,34 +44,20 @@ const BannerContainer = styled.div`
   }
 `;
 
-const BannerPozo = () => {
+const BannerPozo = ({pozo}) => {
   return (
     <BannerContainer>
       <div className="circle-pattern"></div>
       <Container className="content">
         <Row className="justify-content-center align-items-center">
           <Col xs={12} md={6}>
-            {/* <img
-              src="https://upload.wikimedia.org/wikipedia/commons/6/64/Logo_de_loter%C3%ADa_de_Santa_Fe.png"
-              alt="Loteria de Santa Fe"
-              className="lottery-logo"
-            /> */}
-            <LotteryJackpot/>
+            <LotteryJackpot pozo={pozo}/>
           </Col>
           <Col xs={12} md={6} className="text-section">
             <h1>QuiniBlock</h1>
             <p>LA LOTERIA DEL FUTURO</p>
           </Col>
         </Row>
-        {/* <Row className="justify-content-center align-items-center">
-          <Col xs={12} md={6}>
-            <img
-              src="https://upload.wikimedia.org/wikipedia/commons/a/af/Mr._6.png"
-              alt="Mr. 6 Character"
-              className="character"
-            />
-          </Col>
-        </Row> */}
       </Container>
     </BannerContainer>
   );

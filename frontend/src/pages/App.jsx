@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from "react";
-import Preloader from "../src/components/Pre";
-import Navbar from "./components/Navbar";
-import Home from "./components/Home/Home";
-import MemberShips from "./components/MemberShips/MemberShips";
-import Footer from "./components/Footer";
-import History from "./components/History/HistoryNew";
-import Play from "./components/Play/Play";
+import Preloader from "../components/Pre";
+import Navbar from "../components/Navbar";
+import Home from "./Home/Home";
+import MemberShips from "./MemberShips/MemberShips";
+import Footer from "../components/Footer";
+import History from "./History/HistoryNew";
+import Play from "./Play/Play";
 import {
   BrowserRouter as Router,
   Route,
   Routes,
   Navigate
 } from "react-router-dom";
-import ScrollToTop from "./components/ScrollToTop";
+import ScrollToTop from "../components/ScrollToTop";
 import "./style.css";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";

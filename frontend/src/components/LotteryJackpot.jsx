@@ -72,13 +72,13 @@ const getRandomNumbers = (count, max) => {
   return Array.from(numbers).sort((a, b) => a - b);
 };
 
-const LotteryJackpot = ({ className }) => {
+const LotteryJackpot = ({ className ,pozo }) => {
   const [numbers, setNumbers] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [currentValue, setCurrentValue] = useState(0);
 
   useEffect(() => {
-    const generatedNumbers = getRandomNumbers(10, 1000000);
+    const generatedNumbers = getRandomNumbers(10, pozo * 1000000000); // ETH to Gwei conversion
     setNumbers(generatedNumbers);
 
     const interval = setInterval(() => {
@@ -93,7 +93,7 @@ const LotteryJackpot = ({ className }) => {
     }, 400); // Actualiza cada medio segundo
 
     return () => clearInterval(interval);
-  }, []);
+  }, [pozo]);
 
   useEffect(() => {
     if (numbers.length > 0) {
@@ -109,7 +109,7 @@ const LotteryJackpot = ({ className }) => {
         {digits.map((digit, i) => (
           <DigitBox className="lottery-numbers" key={i} value={parseInt(digit, 10)} />
         ))}
-        <PozoText className="lottery-title">Pozo del Proximo Sorteo (WEI):</PozoText>
+        <PozoText className="lottery-title">Pozo del Proximo Sorteo (GWEI):</PozoText>
       </Container>
     </AppContainer>
   );

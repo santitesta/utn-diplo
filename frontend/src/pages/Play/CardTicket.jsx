@@ -2,15 +2,16 @@ import { useState } from "react";
 import { Col, Row, Button } from "react-bootstrap";
 import PropTypes from 'prop-types';
 import Form from 'react-bootstrap/Form';
-import Card from 'react-bootstrap/Card';
 
-function CardTicket({ variant, count, title, buttonText, handleButton, numeros, setNumeros }) {
+import CardWaitForTx from '../../components/CardWaitForTx'; // Importa el nuevo componente
+
+function CardTicket({ variant, count, title,header, buttonText, handleButton, numeros, setNumeros,buttonEnable ,hash, error }) {
     const [validity, setValidity] = useState(Array(count).fill(true)); // Estado para rastrear la validez de cada input
 
     const handleInputChange = (index, value) => {
         const newNumeros = [...numeros];
         newNumeros[index] = value;
-        setNumeros(newNumeros); // Actualiza el estado en el componente padre
+        setNumeros(newNumeros); // Actualiza el estado en el componente padare
     };
 
     const handleSubmit = (e) => {
@@ -44,11 +45,11 @@ function CardTicket({ variant, count, title, buttonText, handleButton, numeros, 
     };
 
     return (
-        <Card>
-            <Card.Header>{title}</Card.Header>
+        // <Card>
+        <CardWaitForTx hash={hash} error={error} title={title}>
             <Form className="p-1" onSubmit={handleSubmit}>
                 <Form.Group className="mb-3" controlId="ticketBuy">
-                    <Form.Label>Numeros</Form.Label>
+                    <Form.Label>{header}</Form.Label>
                     <Row>
                         {[...Array(count)].map((_, index) => (
                             <Col xs={2} className="d-flex justify-content-center" key={index}>
@@ -63,20 +64,32 @@ function CardTicket({ variant, count, title, buttonText, handleButton, numeros, 
                         ))}
                     </Row>
                 </Form.Group>
-                <Button variant={variant} type="submit">{buttonText}</Button>
+                <Button variant={variant} type="submit"  disabled={buttonEnable}>{buttonText}</Button>
             </Form>
-        </Card>
+        {/* </Card> */}
+        </CardWaitForTx>
     );
 }
 
 // Definir PropTypes para la validación de los props
 CardTicket.propTypes = {
+    variant: PropTypes.string.isRequired,
     count: PropTypes.number.isRequired, // Asegura que count es un número y es requerido
     title: PropTypes.string.isRequired, // Asegura que title es una cadena y es requerido
+    header: PropTypes.string.isRequired, // Asegura que title es una cadena y es requerido
     buttonText: PropTypes.string.isRequired, // Asegura que title es una cadena y es requerido
     handleButton: PropTypes.func.isRequired, // Asegura que handleButton es una función y es requerido
     numeros: PropTypes.arrayOf(PropTypes.number).isRequired, // Asegura que numeros es un array de cadenas y es requerido
     setNumeros: PropTypes.func.isRequired, // Asegura que setNumeros es una función y es requerido
+    buttonEnable: PropTypes.bool,
+    hash: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.oneOf([null])
+    ]),
+    error: PropTypes.oneOfType([
+        PropTypes.object,
+        PropTypes.oneOf([null])
+    ]),
 };
 
 export default CardTicket;

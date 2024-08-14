@@ -12,15 +12,9 @@ describe("TestIntegral", function () {
     let addr3;
     let addr4;
 
-    // const chosenNumbers1 = [1, 2, 3, 4, 5, 6];
-    // const chosenNumbers2 = [5, 6, 7, 8, 9, 10];
-    // const chosenNumbers3 = [1, 2, 3, 4, 5, 7];
     const ticketPrice = ethers.utils.parseEther("1");
 
     const basePotValue = ethers.utils.parseEther("2"); //entiendo que wei
-    
-    // const primaryPot= 1000;
-    // const secondaryPot= 500;
 
     // Configuramos el entorno antes de cada prueba
     const contractAddressFile = path.join(__dirname, "contractAddress.txt"); 

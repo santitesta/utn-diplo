@@ -3,7 +3,9 @@ const cors = require('cors');
 const app = express();
 const port = 3000
 // Configura CORS para permitir solicitudes desde cualquier origen
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:5173',
+}));
 
 /*  Configuracion para interacutuar con un SmartContract */
 const { ethers } = require('ethers');
@@ -15,11 +17,11 @@ const url = 'http://127.0.0.1:7545';
 const provider = new ethers.JsonRpcProvider(url);
 
 
-// Ruta al archivo ABI
-const contractJson = require('C:/Users/Enzo Meoniz/Desktop/CursoBlockchain/utn-diplo/hardhat/artifacts/contracts/QuiniBlockContract.sol/QuiniBlockContract.json');
+// Ruta al archivo ABI //C:\Users\emeoniz\Documents\REPOSITORIOS\000- GITHUB\utn-diplo\backend\artifacts
+const contractJson = require('C:/Users/emeoniz/Documents/REPOSITORIOS/000- GITHUB/utn-diplo/backend/artifacts/contracts/QuiniBlockContract.sol/QuiniBlockContract.json');
 const contractABI = contractJson.abi; // Extraer solo la ABI
 
-const contractAddress = '0x62B3c6193ac12b8eb9988bDc16485502ab72eda2';
+const contractAddress = '0x481636196bb539bBc81A05F8a23c52F107f6b8d7';
 
 // Crear una instancia del contrato
 const contract = new ethers.Contract(contractAddress, contractABI, provider);
@@ -51,6 +53,9 @@ app.get('/estadoContrato', async (req, res) => {
 
         const ticketCount = await contract.ticketCount();
         console.log(`ticketCount: ${ticketCount}`);
+
+        const isDrawActive = await contract.isDrawActive();
+        console.log(`isDrawActive: ${isDrawActive}`);
 
         // Obtener la dirección del owner
         const owner = await contract.owner();
@@ -100,7 +105,8 @@ app.get('/estadoContrato', async (req, res) => {
                 balance: balanceInEth,
                 basePot: basePotValueInEth,
                 ticketPrice: ticketPriceInEth,
-                contadorTicket: ticketCount.toString()
+                contadorTicket: ticketCount.toString(),
+                isDrawActive: isDrawActive,
             },
             sorteo: {
                 numero: currentDrawId.toString(),
@@ -131,7 +137,8 @@ app.get('/estadoContratoStatico', (req, res) => {
             balance: "2.5",
             basePot: "2.0",
             ticketPrice: "1.0",
-            contadorTicket: "6"
+            contadorTicket: "6",
+            isDrawActive: true,
         },
         sorteo: {
             numero: "2",

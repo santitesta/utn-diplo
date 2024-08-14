@@ -16,6 +16,7 @@
     "@web3modal/wagmi": "^5.0.6",
     "axios": "^1.7.3",
     "bootstrap": "^5.3.3",
+    "ethers": "^6.13.2",
     "prop-types": "^15.8.1",
     "react": "^18.3.1",
     "react-bootstrap": "^2.10.4",
