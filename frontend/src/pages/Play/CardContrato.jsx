@@ -47,6 +47,6 @@ function CardContrato({ contrato }) {
 
 // Definir PropTypes para la validación de los props
 CardContrato.propTypes = {
-    contrato: PropTypes.array.isRequired, // Asegura que title es una cadena y es requerido
+    contrato: PropTypes.object.isRequired, // Asegura que title es una cadena y es requerido
 };
 export default CardContrato;

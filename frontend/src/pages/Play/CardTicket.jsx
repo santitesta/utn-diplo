@@ -5,7 +5,7 @@ import Form from 'react-bootstrap/Form';
 
 import CardWaitForTx from '../../components/CardWaitForTx'; // Importa el nuevo componente
 
-function CardTicket({ variant, count, title,header, buttonText, handleButton, numeros, setNumeros,buttonEnable ,hash, error }) {
+function CardTicket({ variant, count, title,header, buttonText, handleButton, numeros, setNumeros,hash, error,isPending ,isConfirming, isConfirmed}) {
     const [validity, setValidity] = useState(Array(count).fill(true)); // Estado para rastrear la validez de cada input
 
     const handleInputChange = (index, value) => {
@@ -46,7 +46,7 @@ function CardTicket({ variant, count, title,header, buttonText, handleButton, nu
 
     return (
         // <Card>
-        <CardWaitForTx hash={hash} error={error} title={title}>
+        <CardWaitForTx hash={hash} error={error} title={title} isPending={isPending} isConfirmed = {isConfirmed}>
             <Form className="p-1" onSubmit={handleSubmit}>
                 <Form.Group className="mb-3" controlId="ticketBuy">
                     <Form.Label>{header}</Form.Label>
@@ -64,7 +64,7 @@ function CardTicket({ variant, count, title,header, buttonText, handleButton, nu
                         ))}
                     </Row>
                 </Form.Group>
-                <Button variant={variant} type="submit"  disabled={buttonEnable}>{buttonText}</Button>
+                <Button variant={variant} type="submit"  disabled={(isConfirming || isPending)?true:false}>{buttonText}</Button>
             </Form>
         {/* </Card> */}
         </CardWaitForTx>
@@ -81,7 +81,9 @@ CardTicket.propTypes = {
     handleButton: PropTypes.func.isRequired, // Asegura que handleButton es una función y es requerido
     numeros: PropTypes.arrayOf(PropTypes.number).isRequired, // Asegura que numeros es un array de cadenas y es requerido
     setNumeros: PropTypes.func.isRequired, // Asegura que setNumeros es una función y es requerido
-    buttonEnable: PropTypes.bool,
+    isPending: PropTypes.bool,
+    isConfirming: PropTypes.bool,
+    isConfirmed: PropTypes.bool,
     hash: PropTypes.oneOfType([
         PropTypes.string,
         PropTypes.oneOf([null])

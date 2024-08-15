@@ -3,10 +3,11 @@ pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Pausable.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 import "./QuiniBlockUtils.sol";
 
-contract QuiniBlockPotManager is Ownable, Pausable, QuiniBlockUtils {
+contract QuiniBlockPotManager is Ownable, Pausable, QuiniBlockUtils, ReentrancyGuard  {
     uint256 public primaryPot;
     uint256 public secondaryPot;
     uint256 public reservePot;

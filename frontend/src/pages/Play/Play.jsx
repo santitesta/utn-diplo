@@ -18,14 +18,14 @@ function Play() {
     // Configura el intervalo para llamar a requestInformation cada minuto
     const intervalId = setInterval(() => {
       requestInformation();
-    }, 60000); // 60000 ms = 1 minuto /10000 ms =10s
+    }, 1000); // 60000 ms = 1 minuto /10000 ms =10s
 
     // Limpia el intervalo cuando el componente se desmonte
     return () => clearInterval(intervalId);
   }, []);
 
   const requestInformation = () => {
-    const baseURL = `${window.URL_BACKEND}/estadoContratoStatico`;//estadoContratoStatico
+    const baseURL = `${window.URL_BACKEND}/estadoContrato`;//Statico`;//estadoContratoStatico
     axios.get(baseURL, {
         headers: {
             'Content-Type': 'application/json', 
@@ -33,13 +33,9 @@ function Play() {
     }).then((response) => {
         const data = response.data;
         setEstadoContrato(data);
-        //console.log(`setEstadoContrato: ${JSON.stringify(data)}`);
         setOwner(data.contrato.owner);
         if(data.pozo.primario != pozo)
           setPozo(data.pozo.primario);
-        //console.log(`pozo: ${data.pozo.primario}`);
-
-
     }).catch((error) => {
         console.error(error);
         alert('Fallo la solicitud de datos: ' + error);

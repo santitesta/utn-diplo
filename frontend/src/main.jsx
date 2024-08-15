@@ -9,7 +9,7 @@ import { config } from './wagmi';
 
 const queryClient = new QueryClient();
 
-window.CONTRACT_ADDRESS= '0x481636196bb539bBc81A05F8a23c52F107f6b8d7';
+window.CONTRACT_ADDRESS= '0x3f7b6D6E76dAe57e740b4458AC8057575F479c74';
 window.URL_BACKEND= 'http://127.0.0.1:3000';
 
 ReactDOM.createRoot(document.getElementById('root')).render(

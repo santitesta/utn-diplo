@@ -5,9 +5,9 @@ import Form from 'react-bootstrap/Form';
 import NumberInput from '../../components/NumberInput'; 
 import CardWaitForTx from '../../components/CardWaitForTx'; // Importa el nuevo componente
 
-function CardSorteo({ title, buttonText,buttonText2, pozoPrimario, setPozoPrimario, pozoSec, setPozoSec, reservePot, setReservePot, handleSubmit,handleSubmit2,  hash, error ,buttonEnable}) {
+function CardSorteo({ title, buttonText,buttonText2, pozoPrimario, setPozoPrimario, pozoSec, setPozoSec, reservePot, setReservePot, handleSubmit,handleSubmit2,  hash, error,isPending ,isConfirming, isConfirmed }) {
     return (
-        <CardWaitForTx hash={hash} error={error} title={title}>
+        <CardWaitForTx hash={hash} error={error} title={title} isPending={isPending} isConfirmed = {isConfirmed}>
             <Form className="p-1"  onSubmit={handleSubmit}>
                 <Form.Group className="mb-3" controlId="setPot">
                     <Form.Label>Ajustar pozos</Form.Label>
@@ -34,14 +34,14 @@ function CardSorteo({ title, buttonText,buttonText2, pozoPrimario, setPozoPrimar
                             />
                         </Col>
                     </Row>
-                    <Button variant="outline-primary" type="submit" disabled={buttonEnable}>{buttonText}</Button>
+                    <Button variant="outline-primary" type="submit" disabled={(isConfirming || isPending)?true:false}>{buttonText}</Button>
                     
                 </Form.Group>
             </Form>
             <hr/>
             <Form className="p-1" onSubmit={handleSubmit2}>
                 <Form.Group className="mb-3" controlId="starDraw">
-                    <Button variant="outline-danger" type="submit"  disabled={buttonEnable}>{buttonText2}</Button>
+                    <Button variant="outline-danger" type="submit"  disabled={(isConfirming || isPending)?true:false}>{buttonText2}</Button>
                 </Form.Group>
             </Form>
         </CardWaitForTx>
@@ -68,7 +68,9 @@ CardSorteo.propTypes = {
     setPozoSec: PropTypes.func.isRequired,
     setReservePot: PropTypes.func.isRequired,
     handleSubmit: PropTypes.func.isRequired,
-    buttonEnable: PropTypes.bool,
+    isPending : PropTypes.bool,
+    isConfirming: PropTypes.bool,
+    isConfirmed: PropTypes.bool,
     hash: PropTypes.oneOfType([
         PropTypes.string,
         PropTypes.oneOf([null])

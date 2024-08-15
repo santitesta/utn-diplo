@@ -291,6 +291,9 @@ describe("TestIntegral", function () {
     
         await printBalances("AL FINALIZAR");
     });
-    
-
+    it("5. Deploy", async function () {
+        let currentDrawId;
+        currentDrawId = await quiniBlock.currentDrawId();
+        console.log(`Existe sorteo activo Numero: ${currentDrawId}`);
+    });
 });

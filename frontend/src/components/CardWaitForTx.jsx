@@ -4,12 +4,10 @@ import { Spinner, Card } from 'react-bootstrap';
 import { FaCheckCircle, FaTimesCircle  } from 'react-icons/fa';
 import { useWaitForTransactionReceipt } from 'wagmi';
 
-function CardWaitForTx({ hash, title, children, error }) {
-    const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash });
-
+function CardWaitForTx({ hash, title, children, error , isPending, isConfirmed}) {
     return (
         <div style={{ position: 'relative' }}>
-            {isConfirming && (
+            {isPending && (
                 <div style={{
                     position: 'absolute',
                     top: 0,
@@ -30,9 +28,6 @@ function CardWaitForTx({ hash, title, children, error }) {
                 <Card.Body>
                     {children}
                 </Card.Body>
-                {/* <Card.Footer className="text-center">
-                    <button className="btn btn-outline-danger" onClick={handleSubmit} disabled={!buttonEnable}>{buttonText}</button>
-                </Card.Footer> */}
                 {isConfirmed && (
                     <Card.Footer className="text-muted">
                         <FaCheckCircle style={{ color: 'green', marginRight: '8px' }} />
@@ -61,6 +56,8 @@ CardWaitForTx.propTypes = {
     ]),
     title: PropTypes.string.isRequired,
     children: PropTypes.node.isRequired,
+    isPending: PropTypes.bool,
+    isConfirmed: PropTypes.bool,
 };
 
 export default CardWaitForTx;

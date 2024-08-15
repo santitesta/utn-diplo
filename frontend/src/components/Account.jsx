@@ -22,7 +22,7 @@ export default function Account({owner}) {
   return (
     <div className="container-conection" >
       <div className="row">
-        <div myImgclassName="inline">
+        <div>
 
           {(address.toLowerCase() === owner.toLowerCase())?(<img alt="TheFiveBlocks!" className="avatar" src={myImg} />):          
           ensAvatar ? (

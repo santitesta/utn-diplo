@@ -7,7 +7,7 @@ function InformacionContrato({ estadoContrato }) {
     const { contrato, sorteo, pozo } = estadoContrato;
     return (
         <>
-            {sorteo && <CardInfoSorteo sorteo={sorteo} />}
+            {sorteo && <CardInfoSorteo sorteo={sorteo} isDrawActive = {contrato?.isDrawActive?contrato.isDrawActive:false}/>}
             <hr />
             {contrato && <CardContrato contrato={contrato} />}
             <hr />

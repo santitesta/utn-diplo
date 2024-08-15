@@ -3,7 +3,8 @@ pragma solidity ^0.8.24;
 
 import "./QuiniBlockPotManager.sol";
 
-contract QuiniBlockContract is QuiniBlockPotManager {
+
+contract QuiniBlockContract is QuiniBlockPotManager{
     struct Ticket {
         uint32[6] chosenNumbers;
         address buyer;
@@ -36,12 +37,12 @@ contract QuiniBlockContract is QuiniBlockPotManager {
     constructor(uint256 _basePotValue, address initialOwner) QuiniBlockPotManager(_basePotValue,initialOwner) {}
 
     // Function to purchase a ticket
-    function purchaseTicket(uint32[6] memory _chosenNumbers) public payable whenNotPaused {
+    // Using OpenZeppelin's nonReentrant to prevent two transactions from interfering with each other
+    function purchaseTicket(uint32[6] memory _chosenNumbers) public payable nonReentrant whenNotPaused {
         // // Check if the sent value is equal to the ticket price
+        require(isDrawActive, "No active draw available for ticket purchase");
         require(msg.value == ticketPrice, "Incorrect Ether value sent");
-        require(currentDrawId > 0, "No draw has been initiated yet");
         require(areValidNumbers(_chosenNumbers), "Chosen numbers must be between 0 and 45");
-        require(draws[currentDrawId].drawDate == 0, "No active draw with the current draw ID");
 
         uint32[6] memory orderChosenNumbers = orderNumbers(_chosenNumbers);
         tickets[ticketCount] = Ticket({
@@ -55,6 +56,7 @@ contract QuiniBlockContract is QuiniBlockPotManager {
         // //incremento los pozos
         incrementPots(ticketPrice);
     }
+    
 
     // Function to start a new draw
     function startDraw() public onlyOwner whenNotPaused isPrimaryPotAvailable{
@@ -65,32 +67,35 @@ contract QuiniBlockContract is QuiniBlockPotManager {
 
     // Function that issues the draw and distributes the prize
     function emitDraw(uint32[6] memory _winningNumbers) public onlyOwner whenNotPaused {
-        require(isDrawActive, "No active draw in progress"); // Verifica que hay un sorteo activo
+        require(isDrawActive, "No active draw in progress");
         require(areValidNumbers(_winningNumbers), "Winning numbers must be between 0 and 45");
-        // Buscar a los ganadores con los números
-        address[] memory myWinners  = findWinners(currentDrawId, _winningNumbers); // Inicializar como dirección nula
 
+        // Buscar a los ganadores
+        address[] memory myWinners  = findWinners(currentDrawId, _winningNumbers);
+
+        // Actualizar el estado antes de transferir fondos
         draws[currentDrawId] = Draw({
             winningNumbers: _winningNumbers,
             drawDate: block.timestamp,
             winners : myWinners
         });
 
-        //transfiere los fondos
+        emit DrawDone(currentDrawId, block.timestamp, _winningNumbers, myWinners);
+
         if (myWinners.length > 0) {
             uint256 prize = primaryPot / myWinners.length;
             for (uint32 i = 0; i < myWinners.length; i++) {
+                // Transferir después de actualizar el estado
                 (bool success, ) = myWinners[i].call{value: prize}("");
                 require(success, "Transfer to winner failed");
             }
 
-            resetPrimaryPot();// Reset primary pot after distribution
+            // Resetear el primaryPot después de la transferencia
+            resetPrimaryPot();
         }
 
-        //falta ajustar los pozo para el siguiente sorteo
-        emit DrawDone(currentDrawId, block.timestamp, _winningNumbers, myWinners);
-        isDrawActive = false; // Marca el sorteo como finalizado
-        currentDrawId++; // Incrementa el ID del sorteo para el próximo sorteo
+        isDrawActive = false;
+        currentDrawId++;
     }
 
     // Function to see the result of a draw
@@ -128,6 +133,11 @@ contract QuiniBlockContract is QuiniBlockPotManager {
         }
 
         return winners;
+    }
+
+    // Function function to end the draw in failed situations
+    function emergencyResetDraw() public onlyOwner {
+        isDrawActive = false;
     }
 
 }
