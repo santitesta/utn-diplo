@@ -1,6 +1,6 @@
 import React from "react";
 import { Container, Row, Col } from "react-bootstrap";
-import myImg from "../../assets/avatar.svg";
+import myImg from "../../assets/images/avatar.svg";
 import Tilt from "react-parallax-tilt";
 
 function Home2() {

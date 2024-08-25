@@ -1,0 +1,88 @@
+.app-container {
+  /* Estilos del contenedor principal si es necesario */
+}
+
+.lottery-container {
+  display: flex;
+  gap: 10px;
+  position: relative;
+}
+
+.box {
+  position: relative;
+  height: 100px;
+  width: 100px;
+}
+
+.front-box,
+.back-box {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: Helvetica;
+  font-weight: 800;
+  backface-visibility: hidden;
+  font-size: 2rem;
+}
+
+.front-box {
+  background-color: #6cab64;
+  z-index: 1;
+}
+
+.back-box {
+  background-color: #6cab64;
+  border: solid 2px #6cab64;
+  color: #fafafa;
+  z-index: 1;
+}
+
+.gold {
+  text-shadow: 0 0 5px #ffa500, 0 0 15px #ffa500, 0 0 20px #ffa500, 0 0 40px #ffa500,
+  0 0 60px #ff0000, 0 0 10px #ff8d00, 0 0 98px #ff0000;
+  color: #fff6a9;
+}
+.lottery-title {
+  position: absolute;
+  top: -30px;
+  left: -20px;
+  font-size: 35px;
+  text-shadow: 0 0 5px #ffa500, 0 0 15px #ffa500, 0 0 20px #ffa500, 0 0 40px #ffa500,
+    0 0 60px #ff0000, 0 0 10px #ff8d00, 0 0 98px #ff0000;
+  color: #fff6a9;
+  font-family: 'Sacramento', cursive;
+  text-align: center;
+  animation: blink 6s infinite;
+  z-index: 2;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@media (max-width: 1280px) {
+  .lottery-title {
+    font-size: 30px !important;
+    margin-top: 5px !important;
+    padding: 0 1rem;
+  }
+
+  .lottery-container {
+    padding-top: 50px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .lottery-title {
+    font-size: 25px !important;
+    margin-top: 5px !important;
+    padding: 0 1rem;
+  }
+
+  .lottery-container {
+    padding-top: 50px !important;
+  }
+}
