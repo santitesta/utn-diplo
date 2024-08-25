@@ -22,15 +22,15 @@ function CardWaitForTx({ hash, title, children, error , isPending, isConfirmed})
                     <Spinner animation="border" variant="primary" />
                 </div>
             )}
-            <Card>
-                <Card.Header>{title}</Card.Header>
+            <Card className='container-conection'  text='white'>
+                <Card.Header as="h4">{title}</Card.Header>
                 <Card.Body>
                     {children}
                 </Card.Body>
                 {isConfirmed && (
                     <Card.Footer className="text-muted">
                         <FaCheckCircle style={{ color: 'green', marginRight: '8px' }} />
-                        <span>Transaction confirmed. {hash}</span>
+                        <span>Transaccion Confirmada. {hash}</span>
                     </Card.Footer>
                 )}
                 {error  && (

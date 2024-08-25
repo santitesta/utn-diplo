@@ -34,6 +34,7 @@ function SorteoActual({ sorteoID }) {
             comprarTicket(`${window.CONTRACT_ADDRESS}`, numerosOrdenados, sorteoID, registrarEventos);
         } else {
             console.log("Sin conexión.");
+            alert('No esta conectado a su wallet')
         }
     };
 
@@ -53,6 +54,7 @@ function SorteoActual({ sorteoID }) {
         }
     }, [wfComprarTicket, ticketID]);
 
+
     return (
         <Row>
             <Col className="d-grid gap-2">
@@ -61,7 +63,7 @@ function SorteoActual({ sorteoID }) {
                 <CardTicket
                     count={6}
                     title={"Sorteo en Curso"}
-                    header={"Números Elegidos"}
+                    header={"Seleccione los numeros para participar"}
                     buttonText={"Comprar Ticket"}
                     handleButton={handleComprarTicket}
                     variant="primary"

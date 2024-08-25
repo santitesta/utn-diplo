@@ -31,7 +31,7 @@ button {
   transition: background-color 0.2s;
 }
 button:hover {
-  background-color: #d770f0;
+  background-color: #cf59ec;
 }
 button:disabled {
   opacity: 0.5;

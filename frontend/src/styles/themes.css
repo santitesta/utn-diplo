@@ -518,14 +518,14 @@ button:focus {
 
 .btn-primary {
   color: #fff !important;
-  background-color: #623686 !important;
-  border-color: #623686 !important;
+  background-color: #c770f0 !important;
+  border-color: #cf59ec !important;
 }
 
 .btn-primary:hover {
   color: #fff !important;
-  background-color: #6d20c5d7 !important;
-  border-color: #6d20c5d7 !important;
+  background-color: #cf59ec !important;
+  border-color: #cf59ec !important;
 }
 .btn:focus {
   outline: none !important;
