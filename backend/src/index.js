@@ -26,7 +26,6 @@ const provider = new ethers.JsonRpcProvider(url);
 const contractJson = require('../../hardhat/artifacts/contracts/QuiniBlockContract.sol/QuiniBlockContract.json');
 const contractABI = contractJson.abi; // Extraer solo la ABI
 
-//const contractAddress = '0x481636196bb539bBc81A05F8a23c52F107f6b8d7';
 const contractAddressFile = path.join("../hardhat/test/", "contractAddress.txt"); 
 const contractAddress = fs.readFileSync(contractAddressFile, "utf-8").trim();
 // Crear una instancia del contrato

@@ -45,16 +45,14 @@ Este comando demora un momento mientras descarga todas las dependencias del proy
 
 ## Configuracion de node/express
 
-<<<<<<< HEAD
-el archivo src/index.js debe reconfigurarse para el entorno seteando las variables
+el archivo src/index.js debe reconfigurarse para el entorno seteando las variables, deberia tomarlas bien si ejecutamos todo desde el mismo repo, pero si usamos path distintos se debe setear donde levantar estos valores
     
     const url = 'http://127.0.0.1:7545';
     // Ruta al archivo ABI
-    const contractJson = require('C:/Users/Enzo Meoniz/Desktop/CursoBlockchain/utn-diplo/hardhat/artifacts/contracts/QuiniBlockContract.sol/QuiniBlockContract.json');
-    const contractAddress = '0xD1cacA268717E48B610f0BBFddca057d70c16C29';
+    const contractJson = require('../../hardhat/artifacts/contracts/QuiniBlockContract.sol/QuiniBlockContract.json');
+    const contractAddressFile = path.join("../hardhat/test/", "contractAddress.txt"); 
+    const contractAddress = fs.readFileSync(contractAddressFile, "utf-8").trim();
 
-=======
->>>>>>> 48ecbb470cfef2b083e78a532ccd3e324272a275
 
 ## Compilar y Test de hardhat
 
