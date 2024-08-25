@@ -86,9 +86,8 @@ contract QuiniBlockPotManager is Ownable, Pausable, QuiniBlockUtils, ReentrancyG
     // Para reiniciar el pozo primario al valor base y ajustar el pozo secundario en consecuencia.
     function resetPrimaryPot() public onlyOwner whenNotPaused {
         require(primaryPot >= basePotValue, "Primary pot must be greater than or equal to the base value");
-        uint256 difference = primaryPot - basePotValue;
-        primaryPot = basePotValue;
-        secondaryPot -= difference;
+        primaryPot = basePotValue;  //reset pot to base
+        secondaryPot -= secondaryPot - basePotValue; //reduce secondary pot in a base
         emit ResetPrimaryPot(primaryPot, secondaryPot);
     }
 
