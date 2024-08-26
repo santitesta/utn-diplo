@@ -47,6 +47,21 @@ button:disabled {
   width: auto;
 }
 
+.container-card {
+  background-color: #202127;
+  border-radius: 8px;
+  border: 1px solid #2e2e32;
+  margin: 16px;
+  width: auto;
+}
+
+.container-card > *.card-header{
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  background-color: rgb(10, 4, 22);
+  padding: 12px;
+}
+
 .inline {
   align-items: center;
   display: flex;

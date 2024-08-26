@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { Col, Row, Button } from "react-bootstrap";
+import { Button, Col, Row,  } from "react-bootstrap";
 import PropTypes from 'prop-types';
 import Form from 'react-bootstrap/Form';
-
 import CardWaitForTx from '../CardWaitForTx/CardWaitForTx'; // Importa el nuevo componente
 
-function CardTicket({ variant, count, title,header, buttonText, handleButton, numeros, setNumeros,hash, error,isPending ,isConfirming, isConfirmed}) {
+function CardTicket({ count, title,header, handleButton, numeros, setNumeros,hash, error,isPending , isConfirmed,children}) {
     const [validity, setValidity] = useState(Array(count).fill(true)); // Estado para rastrear la validez de cada input
 
     const handleInputChange = (index, value) => {
@@ -45,14 +44,13 @@ function CardTicket({ variant, count, title,header, buttonText, handleButton, nu
     };
 
     return (
-        // <Card>
         <CardWaitForTx hash={hash} error={error} title={title} isPending={isPending} isConfirmed = {isConfirmed}>
             <Form className="p-1" onSubmit={handleSubmit}>
                 <Form.Group className="mb-3" controlId="ticketBuy">
                     <Form.Label>{header}</Form.Label>
                     <Row>
                         {[...Array(count)].map((_, index) => (
-                            <Col xs={2} className="d-flex justify-content-center" key={index}>
+                            <Col xs sm="6" md="2" className="d-flex justify-content-center p-1" key={index}>
                                 <Form.Control
                                     type="text"
                                     placeholder={`#${index + 1}`}
@@ -64,25 +62,21 @@ function CardTicket({ variant, count, title,header, buttonText, handleButton, nu
                         ))}
                     </Row>
                 </Form.Group>
-                <Button variant={variant} type="submit"  disabled={(isConfirming || isPending)?true:false}>{buttonText}</Button>
+                {children}
             </Form>
-        {/* </Card> */}
         </CardWaitForTx>
     );
 }
 
 // Definir PropTypes para la validación de los props
 CardTicket.propTypes = {
-    variant: PropTypes.string.isRequired,
     count: PropTypes.number.isRequired, // Asegura que count es un número y es requerido
     title: PropTypes.string.isRequired, // Asegura que title es una cadena y es requerido
     header: PropTypes.string.isRequired, // Asegura que title es una cadena y es requerido
-    buttonText: PropTypes.string.isRequired, // Asegura que title es una cadena y es requerido
     handleButton: PropTypes.func.isRequired, // Asegura que handleButton es una función y es requerido
     numeros: PropTypes.arrayOf(PropTypes.number).isRequired, // Asegura que numeros es un array de cadenas y es requerido
     setNumeros: PropTypes.func.isRequired, // Asegura que setNumeros es una función y es requerido
     isPending: PropTypes.bool,
-    isConfirming: PropTypes.bool,
     isConfirmed: PropTypes.bool,
     hash: PropTypes.oneOfType([
         PropTypes.string,
@@ -92,6 +86,7 @@ CardTicket.propTypes = {
         PropTypes.object,
         PropTypes.oneOf([null])
     ]),
+    children: PropTypes.node, // Agregar la definición de children
 };
 
 export default CardTicket;

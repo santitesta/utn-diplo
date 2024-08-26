@@ -1,10 +1,9 @@
 
 import { useState, useEffect } from "react";
-import { Col, Row } from "react-bootstrap";
+import { Col, Row, Button } from "react-bootstrap";
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { useAccount } from 'wagmi';
-import axios from 'axios';
 //COMPONENTES
 import Account from '../Web3/Account';
 import { Connect } from '../Web3/Connect';
@@ -120,21 +119,31 @@ function Botonera({ owner, sorteoID }) {
                             hash={wcSetearPozos.data}
                         />
                         <hr />
+
                         <CardTicket
                             count={6}
                             title={"Sorteo"}
                             header={"Números Ganadores"}
-                            buttonText={"Finalizar"}
                             handleButton={handleFinalizoSorteo}
-                            variant="success"
                             numeros={numerosGanadores}
                             setNumeros={setNumerosGanadores}
                             isPending={wcFinalizarSorteo.isPending}
-                            isConfirming={wfFinalizarSorteo.isConfirming}
                             isConfirmed={wfFinalizarSorteo.isConfirmed}
                             error={wcFinalizarSorteo.error}
                             hash={wcFinalizarSorteo.data}
-                        />
+                            >
+                            {isConnected ? 
+                                <Button 
+                                    variant="primary" 
+                                    type="submit"  
+                                    disabled={(wfFinalizarSorteo.isConfirming || wfFinalizarSorteo.isConfirmed)?true:false}
+                                    >
+                                        Finalizar Sorteo
+                                </Button>
+                                : 
+                                <Connect/> 
+                            } 
+                        </CardTicket>
                         <hr />
                     </>
                 )}

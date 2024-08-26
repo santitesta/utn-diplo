@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Col, Row } from "react-bootstrap";
+import { Col, Row, Button } from "react-bootstrap";
 import { useAccount } from 'wagmi';
 import Account from '../Web3/Account';
 import { Connect } from '../Web3/Connect';
@@ -58,23 +58,32 @@ function SorteoActual({ sorteoID }) {
     return (
         <Row>
             <Col className="d-grid gap-2">
-                {isConnected ? <Account /> : <Connect />}
+                {isConnected && <Account /> }
                 <hr />
                 <CardTicket
                     count={6}
                     title={"Sorteo en Curso"}
                     header={"Seleccione los numeros para participar"}
-                    buttonText={"Comprar Ticket"}
                     handleButton={handleComprarTicket}
-                    variant="primary"
                     numeros={numeros}
                     setNumeros={setNumeros}
                     isPending={wcComprarTicket.isPending}
-                    isConfirming={wfComprarTicket.isConfirming}
                     isConfirmed={wfComprarTicket.isConfirmed}
                     error={wcComprarTicket.error}
                     hash={wcComprarTicket.data}
-                />
+                >
+                    {isConnected ? 
+                        <Button 
+                            variant="primary" 
+                            type="submit"  
+                            disabled={(wfComprarTicket.isConfirming || wfComprarTicket.isConfirmed)?true:false}
+                            >
+                                Comprar Ticket
+                        </Button>
+                        : 
+                        <Connect/> 
+                    } 
+                </CardTicket>
             </Col>
         </Row>
     );
