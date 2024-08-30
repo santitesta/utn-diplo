@@ -57,10 +57,6 @@ function SorteoActual({ sorteoID }) {
         }
     }, [wfComprarTicket, ticketID]);
 
-    const alerta =(mensaje)=>{
-        alert(`alerta de ${mensaje}`);
-    }
-
     return (
         <Row>
             <Col className="d-grid gap-2">
@@ -68,7 +64,7 @@ function SorteoActual({ sorteoID }) {
                 <hr />
                 <CardTicket
                     count={6}
-                    title={"Sorteo en Curso"}
+                    title={"Comprar un Ticket"}
                     header={"Seleccione los numeros para participar"}
                     handleButton={handleComprarTicket}
                     numeros={numeros}
