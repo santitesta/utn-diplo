@@ -1,30 +1,57 @@
 import React from "react";
 import { Container, Col, Row } from "react-bootstrap";
-
-import BannerPozo from "../../components/Admin/BannerPozo";
-import Botonera from "../../components/Admin/Botonera";
-import InformacionContrato from "../../components/Admin/InformacionContrato";
-
+import { useAccount } from 'wagmi';
+// HOOKS
 import useContractInfo from "../../hooks/useContractInfo";
+//COMPONENTES
+import LotteryChart from '../../components/Admin/LotteryChart';
+import SorteoCard from '../../components/Admin/SorteoCard'; 
+import PozosCard from '../../components/Admin/PozosCard';  
+import ContratoCard from '../../components/Admin/ContratoCard';  
+import EstadoCard from '../../components/Admin/EstadoCard';  
 
 function Admin() {
-  const { estadoContrato, owner, pozo, currentDraw } = useContractInfo();
+  const { isConnected } = useAccount();
+  const { estadoContrato } = useContractInfo();
 
   return (
     <div>
       <Container fluid className="resume-section">
-        {/* { pozo && <BannerPozo pozo={pozo} /> } */}
         <Row className="m-2">
-          <Col className="d-grid gap-2">
-            {owner && <Botonera owner={owner} sorteoID={currentDraw}/>}
-          </Col>
-          <Col className="d-grid gap-2">
-            {estadoContrato ? (
-              <InformacionContrato estadoContrato={estadoContrato} />
-            ) : (
-              <p>Cargando información del contrato...</p>
-            )}
-          </Col>
+          <Row>
+            <Col className="col-xl-5 col-lg-6">
+              <Row>
+                <Col className="col-sm-6">
+                    <SorteoCard 
+                      estadoContrato={estadoContrato} 
+                      isConnected={isConnected} 
+                    /> 
+                </Col>
+                <Col className="col-sm-6">
+                    <PozosCard
+                      estadoContrato={estadoContrato}
+                      isConnected={isConnected}
+                    />
+                </Col>
+                <Col className="col-sm-6">
+                    <ContratoCard 
+                      estadoContrato={estadoContrato} 
+                      isPaused={false} 
+                    /> 
+                </Col>
+                <Col className="col-sm-6">
+                    <EstadoCard
+                      estadoContrato={estadoContrato}
+                      isConnected={isConnected}
+                    />
+                </Col>
+              </Row>
+
+            </Col>
+            <Col className="col-xl-7 col-lg-6">
+              <LotteryChart />
+            </Col>
+          </Row>
         </Row>
       </Container>
     </div>
@@ -32,3 +59,4 @@ function Admin() {
 }
 
 export default Admin;
+

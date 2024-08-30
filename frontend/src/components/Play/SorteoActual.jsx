@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Col, Row, Button } from "react-bootstrap";
+import {Container, Col, Row, Button } from "react-bootstrap";
 import { useAccount } from 'wagmi';
 import Account from '../Web3/Account';
 import { Connect } from '../Web3/Connect';
@@ -11,8 +11,11 @@ import {
     registrarEventos
 } from '../../services/contractService';
 
+import useContractInfo from "../../hooks/useContractInfo";
+//icono
 function SorteoActual({ sorteoID }) {
     const { isConnected, address } = useAccount();
+    const { estadoContrato, owner, pozo, currentDraw } = useContractInfo();
     const count = 6;
     const [numeros, setNumeros] = useState(Array(count).fill(null));
     const [registroID, setRegistroID] = useState(null);
@@ -54,6 +57,9 @@ function SorteoActual({ sorteoID }) {
         }
     }, [wfComprarTicket, ticketID]);
 
+    const alerta =(mensaje)=>{
+        alert(`alerta de ${mensaje}`);
+    }
 
     return (
         <Row>

@@ -2,7 +2,7 @@ const express = require('express')
 const cors = require('cors');
 const app = express();
 const fs = require("fs");
-const mysql = require('mysql'); // Asegúrate de que esta línea esté presente
+const mysql = require('mysql2'); // Asegúrate de que esta línea esté presente
 const port = 3000
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -36,9 +36,10 @@ const contract = new ethers.Contract(contractAddress, contractABI, provider);
 // Conexión a la base de datos
 const connection = mysql.createConnection({
     host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'quiniblockDB'
+    user: 'fiveblocks',
+    password: 'password.24!',
+    database: 'quiniblockDB',
+    port: 33066 // El puerto 3306 es el predeterminado de MySQL pero se podria cambiar por el docker
 });
 
 connection.connect((err) => {
@@ -206,4 +207,32 @@ app.put('/actualizarCompra/:id', async (req, res) => {
         console.error('Error al procesar la solicitud:', error);
         res.status(500).send('Error interno del servidor');
     }
+});
+
+app.get('/estadoContratoEstatico', (req, res) => {
+    const staticData = {
+        contrato: {
+            owner: "0x0b433B0910f195eB323A3648Dec0a5290Ffd2fF2",
+            balance: "2.5",
+            basePot: "2.0",
+            ticketPrice: "1.0",
+            contadorTicket: "6"
+        },
+        sorteo: {
+            numero: "2",
+            anterior: {
+                numero: "2",
+                drawDate: "4/8/2024, 07:07:06",
+                winningNumbers: [7, 18, 19, 29, 32, 39],
+                winners: ["0x5ABBBB031ea0f2F1C26591E2698ff51943A760D6"]
+            }
+        },
+        pozo: {
+            primario: "2.0",
+            secundario: "4.7",
+            reserva: "0.3"
+        }
+    };
+
+    res.json(staticData);
 });
