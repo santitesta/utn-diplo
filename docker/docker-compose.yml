@@ -1,30 +1,83 @@
+version: '3.8'
+
 services:
+  # MySQL Database Service
   db:
     image: mysql:latest
     restart: always
     environment:
-      MYSQL_DATABASE: 'quiniblockDB'
-      MYSQL_USER: 'fiveblocks'
-      MYSQL_PASSWORD: 'password.24!'
-      MYSQL_ROOT_PASSWORD: 'password.24!'
+      MYSQL_DATABASE: 'quiniblockDB'    # Initial database name
+      MYSQL_USER: 'fiveblocks'          # Non-root MySQL user
+      MYSQL_PASSWORD: 'password.24!'          # Password for non-root user
+      MYSQL_ROOT_PASSWORD: 'password.24!'     # Password for root user
     ports:
-      - '33066:3306'
+      - '33066:3306'                    # Port mapping for MySQL
     volumes:
-      - my-db:/var/lib/mysql
-      - ../backend/script/quiniblockDB.sql:/docker-entrypoint-initdb.d/quiniblockDB.sql
+      - my-db:/var/lib/mysql            # Persistent storage volume
+      - ../backend/script/quiniblockDB.sql:/docker-entrypoint-initdb.d/quiniblockDB.sql  # Initialization SQL script
     expose:
-      - '3306'
+      - '3306'                          # Expose internal MySQL port to other services
+    networks:
+      - app-network
 
+  # phpMyAdmin Service
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     restart: always
     environment:
-      PMA_HOST: db
-      MYSQL_ROOT_PASSWORD: 'password.24!'
+      PMA_HOST: db                      # MySQL host for phpMyAdmin
+      MYSQL_ROOT_PASSWORD: 'password.24!'     # Password for root user
     ports:
-      - '8080:80'
+      - '8080:80'                       # Port mapping for phpMyAdmin
     depends_on:
       - db
+    networks:
+      - app-network
 
+  # React App Service
+  react-app:
+    build:
+      context: ../frontend           # Path to the React app Dockerfile
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'                     # Port mapping for React app
+    depends_on:
+      - node-server                     # Ensure Node server starts before React app
+    networks:
+      - app-network
+
+  # Node.js Server Service
+  node-server:
+    build:
+      context: ../backend            # Path to the Node.js server Dockerfile
+      dockerfile: Dockerfile
+    ports:
+      - '5000:5000'                     # Port mapping for Node.js server
+    depends_on:
+      - db                              # Ensure database starts before Node server
+    networks:
+      - app-network
+    environment:
+      DB_HOST: db                       # MySQL service hostname
+      DB_USER: fiveblocks               # MySQL username
+      DB_PASSWORD: password.24!               # MySQL password
+      DB_NAME: quiniblockDB             # Database name
+
+  # Truffle/Hardhat Service for Blockchain Interaction
+  truffle:
+    build:
+      context: ../hardhat            # Path to the Truffle/Hardhat Dockerfile
+      dockerfile: Dockerfile
+    networks:
+      - app-network
+    depends_on:
+      - node-server                     # Ensure Node server starts before Truffle
+
+# Networks Definition
+networks:
+  app-network:
+    driver: bridge
+
+# Volumes Definition
 volumes:
-  my-db:
+  my-db:                                # Persistent volume for MySQL data
