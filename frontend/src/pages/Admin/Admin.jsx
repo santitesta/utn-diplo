@@ -11,12 +11,17 @@ import ContratoCard from '../../components/Admin/ContratoCard';
 import EstadoCard from '../../components/Admin/EstadoCard';  
 
 function Admin() {
-  const { isConnected } = useAccount();
-  const { estadoContrato } = useContractInfo();
+  const { isConnected,address } = useAccount();
+  const { estadoContrato,owner } = useContractInfo();
 
+  const isOwner= address==owner;
+
+  
+  
   return (
-    <div>
+    <>
       <Container fluid className="resume-section">
+        {!isOwner &&<div className="bg-danger"> NO ES OWNER </div>}
         <Row className="m-2">
           <Row>
             <Col className="col-xl-5 col-lg-6">
@@ -54,7 +59,7 @@ function Admin() {
           </Row>
         </Row>
       </Container>
-    </div>
+    </>
   );
 }
 

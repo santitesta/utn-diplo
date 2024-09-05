@@ -24,13 +24,26 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `sorteos`
+--
+
+CREATE TABLE `sorteos` (
+  `id` int NOT NULL,
+  `fechaInicio` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `fechaFin` datetime DEFAULT NULL,
+  `numerosGanadores` varchar(20) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `ticketsvendidos`
 --
 
 CREATE TABLE `ticketsvendidos` (
   `id` int NOT NULL,
   `tx_hash` varchar(66) DEFAULT NULL,
-  `numeros_elegidos` varchar(17) NOT NULL,
+  `numeros_elegidos` varchar(20) NOT NULL,
   `fecha` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `nro_sorteo` int NOT NULL,
   `owner` varchar(42) NOT NULL,
@@ -38,18 +51,51 @@ CREATE TABLE `ticketsvendidos` (
   `ticketID` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
-ALTER TABLE `ticketsvendidos`
+--
+-- Índices para tablas volcadas
+--
+
+--
+-- Indices de la tabla `sorteos`
+--
+ALTER TABLE `sorteos`
   ADD PRIMARY KEY (`id`);
 
+--
+-- Indices de la tabla `ticketsvendidos`
+--
+ALTER TABLE `ticketsvendidos`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `sorteo_id` (`sorteo_id`);
+
+--
+-- AUTO_INCREMENT de las tablas volcadas
+--
+
+--
+-- AUTO_INCREMENT de la tabla `sorteos`
+--
+ALTER TABLE `sorteos`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `ticketsvendidos`
+--
 ALTER TABLE `ticketsvendidos`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
+--
+-- Restricciones para tablas volcadas
+--
+
+--
+-- Filtros para la tabla `ticketsvendidos`
+--
+ALTER TABLE `ticketsvendidos`
+  ADD CONSTRAINT `ticketsvendidos_ibfk_1` FOREIGN KEY (`sorteo_id`) REFERENCES `sorteos` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 COMMIT;
+
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-
-CREATE USER 'fiveblocks'@'%' IDENTIFIED BY 'password.24!';
-GRANT ALL PRIVILEGES ON quiniblockDB.* TO 'fiveblocks'@'%';
-FLUSH PRIVILEGES;

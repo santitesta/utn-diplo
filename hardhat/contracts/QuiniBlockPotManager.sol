@@ -20,7 +20,7 @@ contract QuiniBlockPotManager is Ownable, Pausable, QuiniBlockUtils, ReentrancyG
     event SetPotValues(uint256 primaryPot, uint256 secondaryPot, uint256 reservePot);
     event SetPotPercentages(uint8 primaryPotPercentage, uint8 secondaryPotPercentage, uint8 reservePotPercentage);
     event IncrementedPot(uint256 totalIncrement, uint256 primaryIncrement, uint256 secondaryIncrement, uint256 reserveIncrement);
-    event ResetPrimaryPot(uint256 newPrimaryPot, uint256 newSecondaryPot);
+    event AdjustPots(uint256 newPrimaryPot, uint256 newSecondaryPot);
 
     modifier isPrimaryPotAvailable(){
         require(primaryPot > 0, "An available primary well is required.");
@@ -84,11 +84,17 @@ contract QuiniBlockPotManager is Ownable, Pausable, QuiniBlockUtils, ReentrancyG
     }
 
     // Para reiniciar el pozo primario al valor base y ajustar el pozo secundario en consecuencia.
-    function resetPrimaryPot() public onlyOwner whenNotPaused {
-        require(primaryPot >= basePotValue, "Primary pot must be greater than or equal to the base value");
-        primaryPot = basePotValue;  //reset pot to base
-        secondaryPot -= secondaryPot - basePotValue; //reduce secondary pot in a base
-        emit ResetPrimaryPot(primaryPot, secondaryPot);
+    function adjustPots() internal onlyOwner {
+        if (secondaryPot >= basePotValue) {
+            // Si el pozo secundario es mayor o igual al valor base
+            secondaryPot -= basePotValue;
+            primaryPot = basePotValue;
+        } else {
+            // Si el pozo secundario es menor que el valor base
+            primaryPot = secondaryPot;
+            secondaryPot = 0;
+        }
+        emit AdjustPots(primaryPot, secondaryPot);
     }
 
     // Para establecer el valor base del pozo primario.

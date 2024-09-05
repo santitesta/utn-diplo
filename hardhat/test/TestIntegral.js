@@ -143,14 +143,17 @@ describe("TestIntegral", function () {
 
         await printBalances("DESPUES DE COMPRAR");
 
-         //Finalizamos el Sorteo
-         const pozo = await quiniBlock.primaryPot();
-         const pozo1_eth= ethers.utils.formatEther(pozo);
-         
+         //Finalizamos el Sorteo        
          const tx_draw = await quiniBlock.emitDraw(winnerNumber);
          const ganadores = await quiniBlock.getDraw(currentDrawId);
          console.log (`Finalizo el sorteo: ${currentDrawId}`);
+         const pozo = await quiniBlock.primaryPot();
+         const pozo1_eth= ethers.utils.formatEther(pozo);
          console.log (`Pozo Primario: ${pozo1_eth} Eth`);
+ 
+         const pozo2 = await quiniBlock.secondaryPot();
+         const pozo2_eth= ethers.utils.formatEther(pozo2);
+         console.log (`Pozo Secundario: ${pozo2_eth} Eth`);
          const cantGanadores= ganadores.winners.length;
 
         if (cantGanadores>0){
@@ -178,23 +181,50 @@ describe("TestIntegral", function () {
 
         const winnerNumber = generateUniqueNumbers();
         
-        await printBalances("INICIO");
+      //  await printBalances("INICIO");
 
         //Ahora pasamos al proceso de compra
         await purchaseTicket(addr1, generateUniqueNumbers(), ticketPrice);        
         await purchaseTicket(addr2, generateUniqueNumbers(), ticketPrice);
         await purchaseTicket(addr2, winnerNumber, ticketPrice); //este lo resuelvo asi para ganar al menos una vez
 
-        await printBalances("DESPUES DE COMPRAR");
+       // await printBalances("DESPUES DE COMPRAR");
 
-        //Finalizamos el Sorteo
-        const pozo = await quiniBlock.primaryPot();
-        const pozo1_eth= ethers.utils.formatEther(pozo);
-        
+        // Finalizamos el Sorteo
         const tx_draw = await quiniBlock.emitDraw(winnerNumber);
+        const receipt = await tx_draw.wait();
+
+        // Escuchar el evento AdjustPots
+        const event1 = receipt.events.find(event => event.event === 'PreAdjustPots');
+        const event2 = receipt.events.find(event => event.event === 'AdjustPots');
+        if (event1) {
+            const [newPrimaryPot, newSecondaryPot, newBaseyPot] = event1.args;
+            const newPrimaryPotEth = ethers.utils.formatEther(newPrimaryPot);
+            const newSecondaryPotEth = ethers.utils.formatEther(newSecondaryPot);
+            const newBaseyPotEth = ethers.utils.formatEther(newBaseyPot);
+            console.log('\x1b[36m%s\x1b[0m',`PreAdjustPots event: Primary Pot - ${newPrimaryPotEth} Eth, Secondary Pot - ${newSecondaryPotEth} Eth , Secondary Pot - ${newBaseyPotEth} Eth`);
+        } else {
+            console.log('No AdjustPots event found.');
+        }
+        if (event2) {
+            const [newPrimaryPot, newSecondaryPot] = event2.args;
+            const newPrimaryPotEth = ethers.utils.formatEther(newPrimaryPot);
+            const newSecondaryPotEth = ethers.utils.formatEther(newSecondaryPot);
+            console.log('\x1b[36m%s\x1b[0m',`AdjustPots event: Primary Pot - ${newPrimaryPotEth} Eth, Secondary Pot - ${newSecondaryPotEth} Eth`);
+        } else {
+            console.log('No AdjustPots event found.');
+        }
+        
         const ganadores = await quiniBlock.getDraw(currentDrawId);
         console.log (`Finalizo el sorteo: ${currentDrawId}`);
+
+        const pozo = await quiniBlock.primaryPot();
+        const pozo1_eth= ethers.utils.formatEther(pozo);
         console.log (`Pozo Primario: ${pozo1_eth} Eth`);
+
+        const pozo2 = await quiniBlock.secondaryPot();
+        const pozo2_eth= ethers.utils.formatEther(pozo2);
+        console.log (`Pozo Secundario: ${pozo2_eth} Eth`);
         const cantGanadores= ganadores.winners.length;
 
         if (cantGanadores>0){
@@ -209,6 +239,13 @@ describe("TestIntegral", function () {
         }         
         await printBalances("AL FINALIZAR");
 
+        const _pozo = await quiniBlock.primaryPot();
+        const _pozo1_eth= ethers.utils.formatEther(_pozo);
+        console.log (`Pozo Primario: ${_pozo1_eth} Eth`);
+
+        const _pozo2 = await quiniBlock.secondaryPot();
+        const _pozo2_eth= ethers.utils.formatEther(_pozo2);
+        console.log (`Pozo Secundario: ${_pozo2_eth} Eth`);
         
     });
 
@@ -254,8 +291,6 @@ describe("TestIntegral", function () {
         const winnerNumber = generateUniqueNumbers();
         
         let currentDrawId = await quiniBlock.currentDrawId();
-        const pozo = await quiniBlock.primaryPot();
-        const pozo1_eth = ethers.utils.formatEther(pozo);
     
         try {
             // Intentamos finalizar el sorteo actual
@@ -277,7 +312,13 @@ describe("TestIntegral", function () {
     
         const ganadores = await quiniBlock.getDraw(currentDrawId);
         const cantGanadores = ganadores.winners.length;
-        console.log(`Pozo Primario: ${pozo1_eth} Eth`);
+        const pozo = await quiniBlock.primaryPot();
+        const pozo1_eth= ethers.utils.formatEther(pozo);
+        console.log (`Pozo Primario: ${pozo1_eth} Eth`);
+
+        const pozo2 = await quiniBlock.secondaryPot();
+        const pozo2_eth= ethers.utils.formatEther(pozo2);
+        console.log (`Pozo Secundario: ${pozo2_eth} Eth`);
     
         if (cantGanadores > 0) {
             const division = pozo.div(cantGanadores);

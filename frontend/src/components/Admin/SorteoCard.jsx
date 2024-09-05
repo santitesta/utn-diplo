@@ -16,6 +16,8 @@ function SorteoCard({ estadoContrato, isConnected }) {
   const { inicializarSorteo, wcInicializarSorteo, wfInicializarSorteo } = useInicializarSorteo();
   const { finalizarSorteo, wcFinalizarSorteo, wfFinalizarSorteo } = useFinalizarSorteo();
 
+  const [newSorteId, setNewSorteId] = useState(null);
+
   useEffect(() => {
     if (estadoContrato) {
       const { contrato } = estadoContrato;
@@ -78,7 +80,8 @@ function SorteoCard({ estadoContrato, isConnected }) {
 
   const handleIniciarSorteo = () => {
     if (isConnected) {
-      inicializarSorteo(`${window.CONTRACT_ADDRESS}`);
+      console.log(`Inicializando`);
+      inicializarSorteo(`${window.CONTRACT_ADDRESS}`,setNewSorteId);
     } else {
       console.log(`Debe iniciar sesión para inicializar un Sorteo.`);
     }

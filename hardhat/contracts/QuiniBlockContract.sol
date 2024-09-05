@@ -91,7 +91,7 @@ contract QuiniBlockContract is QuiniBlockPotManager{
             }
 
             // Resetear el primaryPot después de la transferencia
-            resetPrimaryPot();
+            adjustPots();
         }
 
         isDrawActive = false;

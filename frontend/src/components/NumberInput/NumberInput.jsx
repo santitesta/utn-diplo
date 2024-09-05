@@ -17,7 +17,7 @@ const NumberInput = ({ placeholder, value, onChange ,className:addClassName }) =
             step="any"
             min="0" // Establece el mínimo permitido a 0 para números positivos
             placeholder={placeholder}
-            value={value>=0 ? value : ''}  // Usa una cadena vacía si el valor es null
+            value={ value !== null ? value : ''}  // Usa una cadena vacía si el valor es null
             onChange={handleChange}
             className= {`text-center ${addClassName}`}
             required

@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import Form from 'react-bootstrap/Form';
 import CardWaitForTx from '../CardWaitForTx/CardWaitForTx'; // Importa el nuevo componente
 
-function CardTicket({ count, title,header, handleButton, numeros, setNumeros,hash, error,isPending , isConfirmed,children}) {
+function CardTicket({ count, title,header, handleButton, numeros, setNumeros, writer, isConfirmed,children}) {
     const [validity, setValidity] = useState(Array(count).fill(true)); // Estado para rastrear la validez de cada input
 
     const handleInputChange = (index, value) => {
@@ -44,7 +44,7 @@ function CardTicket({ count, title,header, handleButton, numeros, setNumeros,has
     };
 
     return (
-        <CardWaitForTx hash={hash} error={error} title={title} isPending={isPending} isConfirmed = {isConfirmed}>
+        <CardWaitForTx  {...writer} isConfirmed = {isConfirmed} title={title}>
             <Form className="p-1" onSubmit={handleSubmit}>
                 <Form.Group className="mb-3" controlId="ticketBuy">
                     <Form.Label>{header}</Form.Label>
@@ -60,7 +60,7 @@ function CardTicket({ count, title,header, handleButton, numeros, setNumeros,has
                                 />
                             </Col>
                         ))}
-                    </Row>
+                    </Row>                    
                 </Form.Group>
                 {children}
             </Form>
@@ -76,16 +76,16 @@ CardTicket.propTypes = {
     handleButton: PropTypes.func.isRequired, // Asegura que handleButton es una función y es requerido
     numeros: PropTypes.arrayOf(PropTypes.number).isRequired, // Asegura que numeros es un array de cadenas y es requerido
     setNumeros: PropTypes.func.isRequired, // Asegura que setNumeros es una función y es requerido
-    isPending: PropTypes.bool,
+    // isPending: PropTypes.bool,
     isConfirmed: PropTypes.bool,
-    hash: PropTypes.oneOfType([
-        PropTypes.string,
-        PropTypes.oneOf([null])
-    ]),
-    error: PropTypes.oneOfType([
-        PropTypes.object,
-        PropTypes.oneOf([null])
-    ]),
+    // hash: PropTypes.oneOfType([
+    //     PropTypes.string,
+    //     PropTypes.oneOf([null])
+    // ]),
+    // error: PropTypes.oneOfType([
+    //     PropTypes.object,
+    //     PropTypes.oneOf([null])
+    // ]),
     children: PropTypes.node, // Agregar la definición de children
 };
 
