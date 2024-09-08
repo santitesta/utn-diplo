@@ -1,13 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/Pausable.sol";
-import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+//import "@openzeppelin/contracts/access/Ownable.sol";
+//import "@openzeppelin/contracts/utils/Pausable.sol";
+//import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 import "./QuiniBlockUtils.sol";
 
-contract QuiniBlockPotManager is Ownable, Pausable, QuiniBlockUtils, ReentrancyGuard  {
+contract QuiniBlockPotManager is  Initializable, PausableUpgradeable, OwnableUpgradeable, UUPSUpgradeable, QuiniBlockUtils, ReentrancyGuardUpgradeable  {
     uint256 public primaryPot;
     uint256 public secondaryPot;
     uint256 public reservePot;
@@ -16,6 +21,8 @@ contract QuiniBlockPotManager is Ownable, Pausable, QuiniBlockUtils, ReentrancyG
     uint8 public primaryPotPercentage;
     uint8 public secondaryPotPercentage;
     uint8 public reservePotPercentage;
+
+    bool private _isContractPaused;
 
     event SetPotValues(uint256 primaryPot, uint256 secondaryPot, uint256 reservePot);
     event SetPotPercentages(uint8 primaryPotPercentage, uint8 secondaryPotPercentage, uint8 reservePotPercentage);
@@ -27,11 +34,18 @@ contract QuiniBlockPotManager is Ownable, Pausable, QuiniBlockUtils, ReentrancyG
         _;
     }
 
-    constructor(uint256 _basePotValue, address initialOwner) Ownable(initialOwner) {
+    function initialize(uint256 _basePotValue, address initialOwner) virtual initializer public {
+        __Ownable_init(initialOwner);
         basePotValue = _basePotValue;
         primaryPot = basePotValue;
+        __UUPSUpgradeable_init();
     }
-
+    
+    function _authorizeUpgrade(address newImplementation)
+        internal
+        onlyOwner
+        override
+    {}
     
     // Para establecer los valores de cada pozo.
     function setPotValues(uint256 _primaryPot, uint256 _secondaryPot, uint256 _reservePot) public onlyOwner whenNotPaused {
@@ -101,16 +115,17 @@ contract QuiniBlockPotManager is Ownable, Pausable, QuiniBlockUtils, ReentrancyG
     function setBasePotValue(uint256 _basePotValue) public onlyOwner whenNotPaused {
         basePotValue = _basePotValue;
     }
-
     
     // Function to pause the contract
     function pause() public onlyOwner {
         _pause();
+        _isContractPaused = true;
     }
 
     // Function to unpause the contract
     function unpause() public onlyOwner {
         _unpause();
+        _isContractPaused = false;
     }
 
     // Función para recibir fondos en el contrato.

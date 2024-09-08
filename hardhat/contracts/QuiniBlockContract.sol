@@ -17,15 +17,15 @@ contract QuiniBlockContract is QuiniBlockPotManager{
         address[] winners;
     }
 
-    uint256 public ticketPrice = 0.001 ether; //trabajar en wei
+    uint256 public ticketPrice;
 
     mapping(uint32 => Ticket) public tickets;
     uint32 public ticketCount;
 
     mapping(uint32 => Draw) public draws;
-    uint32 public currentDrawId = 1;
+    uint32 public currentDrawId;
 
-    bool public isDrawActive = false;
+    bool public isDrawActive;
 
     // Events
     event DrawStarted(uint32 drawId,uint256 _primaryPot);
@@ -33,8 +33,15 @@ contract QuiniBlockContract is QuiniBlockPotManager{
     event DrawDone(uint32 drawId,  uint256 drawDate,uint32[6] winningNumbers,address[] winners);
     event SetTicketPrice(uint256 _ticketPriceInWei);
 
-    //constructor for Ownable
-    constructor(uint256 _basePotValue, address initialOwner) QuiniBlockPotManager(_basePotValue,initialOwner) {}
+    function initialize(uint256 _basePotValue, address initialOwner) public initializer override{
+        // Llama a la función initialize del contrato padre
+        super.initialize(_basePotValue, initialOwner);
+
+        // Inicializa la variable isDrawActive a false
+        isDrawActive = false;
+        currentDrawId = 1;
+        ticketPrice= 0.001 ether;
+    }
 
     // Function to purchase a ticket
     // Using OpenZeppelin's nonReentrant to prevent two transactions from interfering with each other
@@ -57,7 +64,6 @@ contract QuiniBlockContract is QuiniBlockPotManager{
         incrementPots(ticketPrice);
     }
     
-
     // Function to start a new draw
     function startDraw() public onlyOwner whenNotPaused isPrimaryPotAvailable{
         require(!isDrawActive, "There is already an active draw in progress"); // Verifica si hay un sorteo activo
@@ -138,6 +144,34 @@ contract QuiniBlockContract is QuiniBlockPotManager{
     // Function function to end the draw in failed situations
     function emergencyResetDraw() public onlyOwner {
         isDrawActive = false;
+    }
+
+    function getContractState() public view returns  (
+        uint256 _ticketPrice,
+        uint32 _ticketCount,
+        bool _isDrawActive,
+        bool _isContractPaused,
+        uint32 _currentDrawId,
+        uint256 _primaryPot,
+        uint256 _secondaryPot,
+        uint256 _reservePot,
+        uint256 _balance,
+        uint256 _basePotValue,
+        address _owner
+    ) {
+        return (
+            ticketPrice,
+            ticketCount,
+            isDrawActive,
+            _isContractPaused,
+            currentDrawId,
+            primaryPot,
+            secondaryPot,
+            reservePot,
+            address(this).balance, // Balance del contrato
+            basePotValue,
+            owner()
+        );
     }
 
 }

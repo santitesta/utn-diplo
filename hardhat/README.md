@@ -111,6 +111,50 @@ Tambien se genera una archivo con la address del contrato, que para probar todo 
 
     rm .\test\contractAddress.txt; npx hardhat test --grep "TestIntegral"
 
+## DEPLOY Y VERIFICACION EN TESTNET AMOY
+
+Desde la consola 
+
+```shell
+
+ npx hardhat compile
+Generating typings for: 14 artifacts in dir: typechain-types for target: ethers-v6
+Successfully generated 58 typings!
+Compiled 14 Solidity files successfully (evm target: paris).
+PS C:\Users\Enzo Meoniz\Desktop\CursoBlockchain\utn-diplo\hardhat.deploy> npx hardhat run .\scripts\deploy-QuiniBlock.ts --network amoy                    
+Deploying QuiniBlockContract...
+QuiniBlockContract deployed to: 0x8c65ee76aDdBef9B2342E9BC2F759E6a7F894D63
+PS C:\Users\Enzo Meoniz\Desktop\CursoBlockchain\utn-diplo\hardhat.deploy> npx hardhat verify --network amoy 0xD2E6D818d45A28F0d8cBBE55Df82446cf262B51b
+[INFO] Sourcify Verification Skipped: Sourcify verification is currently disabled. To enable it, add the following entry to your Hardhat configuration:
+
+sourcify: {
+  enabled: true
+}
+
+Or set 'enabled' to false to hide this message.
+
+For more information, visit https://hardhat.org/hardhat-runner/plugins/nomicfoundation-hardhat-verify#verifying-on-sourcify
+Successfully submitted source code for contract
+contracts/QuiniBlockContract.sol:QuiniBlockContract at 0xD2E6D818d45A28F0d8cBBE55Df82446cf262B51b
+for verification on the block explorer. Waiting for verification result...
+
+Successfully verified contract QuiniBlockContract on the block explorer.
+https://amoy.polygonscan.com/address/0xD2E6D818d45A28F0d8cBBE55Df82446cf262B51b#code
+
+```
+
+Una vez ejecutados estos comandos hay que terminar de verificar el contrato, buscamos la address del proxy. Para el caso:
+```
+QuiniBlockContract deployed to: 0x8c65ee76aDdBef9B2342E9BC2F759E6a7F894D63
+```
+luego hay que ir a contract->more options-> is a proxy? y verificar el proxy
+
+devuelve algo asi
+
+The proxy contract verification completed with the message:
+
+The proxy's (0x8c65ee76addbef9b2342e9bc2f759e6a7f894d63) implementation contract is found at: 0xd2e6d818d45a28f0d8cbbe55df82446cf262b51b
+
 
 ## Contribuciones
 
