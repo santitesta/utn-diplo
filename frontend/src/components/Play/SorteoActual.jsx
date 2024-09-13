@@ -8,25 +8,30 @@ import CardTicket from "../CardTicket/CardTicket";
 import axios from 'axios';
 import {
     useComprarTicket,
-    registrarEventos
+    //registrarEventos
 } from '../../services/contractService';
+import {
+    useComprarTicket as useComprarTicket2,
+    //registrarEventos
+} from '../../services/comprarTicketService';
+
 
 import useContractInfo from "../../hooks/useContractInfo";
 //icono
 function SorteoActual({ sorteoID }) {
     const { isConnected, address } = useAccount();
-    const { estadoContrato, owner, pozo, currentDraw } = useContractInfo();
+    const { estadoContrato} = useContractInfo();
+    const precio = estadoContrato?.contrato.ticketPrice;
     const count = 6;
     const [numeros, setNumeros] = useState(Array(count).fill(null));
     const [registroID, setRegistroID] = useState(null);
-    const [ticketID, setTicketID] = useState(null);
-    const { comprarTicket, wcComprarTicket, wfComprarTicket } = useComprarTicket();
+   // const {  wcComprarTicket, wfComprarTicket } = useComprarTicket();
+    const { comprarTicket, returnedTicketID:ticketID ,isSuccess,hash ,errorMessage,isPending,isError } = useComprarTicket2();
 
     const handleComprarTicket = async () => {
-        registrarEventos(setTicketID, ticketID, wcComprarTicket);
         console.log(`Trata de comprar ticket con números [${numeros}]`);
         let numerosOrdenados = [...numeros].sort((a, b) => a - b);
-        if (isConnected) {
+        if (isConnected && precio> 0) {
             const response = await axios.post(`${window.URL_BACKEND}/registrarCompra`, {
                 chosenNumbers: numerosOrdenados,
                 drawId: sorteoID,
@@ -34,7 +39,7 @@ function SorteoActual({ sorteoID }) {
             });
             setRegistroID(response.data.id);
             console.log("Respuesta de la API:", response.data);
-            comprarTicket(`${window.CONTRACT_ADDRESS}`, numerosOrdenados, sorteoID, registrarEventos);
+            comprarTicket(`${window.CONTRACT_ADDRESS}`, numerosOrdenados, precio);
         } else {
             console.log("Sin conexión.");
             alert('No esta conectado a su wallet')
@@ -43,20 +48,43 @@ function SorteoActual({ sorteoID }) {
 
     useEffect(() => {
         const array_nulo = Array(count).fill(null);
-        if (wfComprarTicket.isSuccess && ticketID && numeros !== array_nulo) {
-            const estado = wfComprarTicket.isSuccess ? 'confirmada' : 'fallida';
-            console.log(`tx [${registroID}]=> ticketID[${ticketID}] => [${estado}]=>hash [${wcComprarTicket.data}]`);
+        if (isSuccess && ticketID > 0 && numeros !== array_nulo) {
+            const estado = isSuccess ? 'confirmada' : 'fallida';
+            console.log(`tx [${registroID}]=> ticketID[${ticketID}] => [${estado}]=>hash [${hash}]`);
             alert(`Se compró ticket[${ticketID}] con números [${numeros}]. Me falta generar el historial`);
             axios.put(`${window.URL_BACKEND}/actualizarCompra/${registroID}`, {
-                txHash: wcComprarTicket.data,
+                txHash: hash,
                 estado: estado,
                 ticketID: ticketID
             });
             setNumeros(array_nulo);
-            setTicketID(null);
         }
-    }, [wfComprarTicket, ticketID]);
+    }, [isSuccess, ticketID]);
 
+    useEffect(() => {
+        if(ticketID == -1)
+        {
+            const shortMessage= errorMessage?.shortMessage || "Unknown error";
+            const array_nulo = Array(count).fill(null);
+            const estado = 'fallida';
+            axios.put(`${window.URL_BACKEND}/actualizarCompra/${registroID}`, {
+                txHash: null,
+                estado: estado,
+                ticketID: null,
+                errorMessage: shortMessage,
+            });
+            setNumeros(array_nulo);
+        }
+    }, [errorMessage, ticketID]);
+
+    // useEffect(() => {
+
+        
+    //     console.log('isPending',isPending);
+    //     console.log('isError',isError);
+    //     console.log('isSuccess',isSuccess);
+
+    // }, [isPending, isSuccess,isError]);
     return (
         <Row>
             <Col className="d-grid gap-2">
@@ -69,18 +97,18 @@ function SorteoActual({ sorteoID }) {
                     handleButton={handleComprarTicket}
                     numeros={numeros}
                     setNumeros={setNumeros}
-                    isPending={wcComprarTicket.isPending}
-                    isConfirmed={wfComprarTicket.isConfirmed}
-                    error={wcComprarTicket.error}
-                    hash={wcComprarTicket.data}
-                >
+                    isPending={isPending}
+                    isConfirmed={isSuccess}
+                    error={isError?errorMessage:null}
+                    hash={hash}
+                >                
                     {isConnected ? 
                         <Button 
                             variant="primary" 
                             type="submit"  
-                            disabled={(wfComprarTicket.isConfirming || wfComprarTicket.isConfirmed)?true:false}
+                            disabled={(isPending && !isSuccess && !errorMessage)?true:false}
                             >
-                                Comprar Ticket
+                                Comprar Ticket ({precio})
                         </Button>
                         : 
                         <Connect/> 

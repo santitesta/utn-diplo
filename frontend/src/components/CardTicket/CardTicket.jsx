@@ -3,8 +3,8 @@ import { Button, Col, Row,  } from "react-bootstrap";
 import PropTypes from 'prop-types';
 import Form from 'react-bootstrap/Form';
 import CardWaitForTx from '../CardWaitForTx/CardWaitForTx'; // Importa el nuevo componente
-
-function CardTicket({ count, title,header, handleButton, numeros, setNumeros, writer, isConfirmed,children}) {
+//{ hash, title, children, error , isPending, isConfirmed}
+function CardTicket({ count, title,header, handleButton, numeros, setNumeros, error , isPending, isConfirmed,children}) {
     const [validity, setValidity] = useState(Array(count).fill(true)); // Estado para rastrear la validez de cada input
 
     const handleInputChange = (index, value) => {
@@ -44,7 +44,8 @@ function CardTicket({ count, title,header, handleButton, numeros, setNumeros, wr
     };
 
     return (
-        <CardWaitForTx  {...writer} isConfirmed = {isConfirmed} title={title}>
+        //{ hash, title, children, error , isPending, isConfirmed}
+        <CardWaitForTx  error ={error} isPending ={isPending}  isConfirmed = {isConfirmed} title={title}>
             <Form className="p-1" onSubmit={handleSubmit}>
                 <Form.Group className="mb-3" controlId="ticketBuy">
                     <Form.Label>{header}</Form.Label>

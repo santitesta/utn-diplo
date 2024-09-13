@@ -1,17 +1,26 @@
 import { http, createConfig } from 'wagmi';
-import { localhost as originalLocalhost } from 'wagmi/chains'; //
+import { localhost as originalLocalhost, polygonAmoy} from 'wagmi/chains'; //
+
 import { injected } from 'wagmi/connectors'; //, walletConnect
 import { createWeb3Modal } from '@web3modal/wagmi/react'
 // import { defaultWagmiConfig } from '@web3modal/wagmi/react/config'
-const projectId = 'ecdd81a82c458b86628c0d3e48e6171c';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
-//configuro para usar localhost Ganache
- const localhost = {
-     ...originalLocalhost,
-     rpcUrls: {
-       default: { http: ['http://127.0.0.1:7545'] }, // Cambiado a 7545
-     },
-  }
+// 0. Setup queryClient
+const queryClient = new QueryClient()
+
+// 1. Your WalletConnect Cloud project ID
+
+const projectId = 'ecdd81a82c458b86628c0d3e48e6171c';
+//https://polygon-amoy.g.alchemy.com/v2/hNPbkU-NvBYB1-lLHafI3SbTduYNPKbz
+//https://rpc-amoy.polygon.technology
+// //configuro para usar localhost Ganache
+const myPolygonAmoy = {
+    ...polygonAmoy,
+    rpcUrls: {
+      default: { http: ['https://rpc-amoy.polygon.technology'] }, // Cambiado a 7545
+    },
+ }
 const metadata = {
     name: 'QuiniBlock',
     description: 'QuiniBlock de The FiveBlocks!',
@@ -19,13 +28,13 @@ const metadata = {
     icons: ['https://avatars.githubusercontent.com/u/37784886']
 }
   
-const chains = [localhost] 
+// const chains = [localhost] 
 
 export const config = createConfig({
-  chains: [localhost],
+  chains: [myPolygonAmoy],
   connectors: [injected()], //, walletConnect({ projectId })
   transports: {
-    [localhost.id]: http(),
+    [polygonAmoy.id]: http(),
   },
 });
 

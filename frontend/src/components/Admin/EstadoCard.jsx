@@ -10,7 +10,7 @@ function EstadoCard({ estadoContrato, isConnected }) {
   const [isFirstPrecio, setIsFirstPrecio] = useState(true);
 
   useEffect(() => {
-      console.log(estadoContrato);
+      //console.log(estadoContrato);
       if(isFirstPrecio){
           setPrecio(estadoContrato?.contrato.ticketPrice)
           setIsFirstPrecio(false);

@@ -1,10 +1,10 @@
 # Use the official Node.js image as the base image
-FROM node:18-alpine
+FROM node:20-alpine
 
 # Set the working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json (if available)
+# Copy package.json and package-lock.json
 COPY package*.json ./
 
 # Install dependencies
@@ -19,8 +19,9 @@ RUN npm run build
 # Install a simple HTTP server to serve the static files
 RUN npm install -g serve
 
-# Expose the port the app will run on
+# Expose the port the app will run on (Vite default port is 5173)
 EXPOSE 3000
 
-# Serve the build directory
-CMD ["serve", "-s", "build"]
+# Serve the build directory dist
+CMD ["serve", "-s", "dist", "-l", "3000"]
+

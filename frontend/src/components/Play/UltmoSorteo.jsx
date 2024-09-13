@@ -4,7 +4,7 @@ import BingoBall from './BingoBall';
 
 export default function UltimoSorteo({ sorteo }) {
 
-  console.log(sorteo)
+  //console.log(console.log(JSON.stringify(sorteo, null, 3)));
   const cantidadGanadores = sorteo.winners.length;
 
 

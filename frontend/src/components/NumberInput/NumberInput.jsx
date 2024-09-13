@@ -28,10 +28,7 @@ const NumberInput = ({ placeholder, value, onChange ,className:addClassName }) =
 // Definir PropTypes para la validación de los props
 NumberInput.propTypes = {
     placeholder: PropTypes.string.isRequired,
-    value: PropTypes.oneOfType([
-        PropTypes.number,
-        PropTypes.oneOf([null])
-    ]),
+
     onChange: PropTypes.func.isRequired,
 };
 

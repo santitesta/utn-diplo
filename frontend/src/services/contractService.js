@@ -4,54 +4,60 @@ import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { parseAbi, parseEther } from 'viem';
 import { config } from '../config/wagmi';
 import { watchContractEvent } from '@wagmi/core';
+//levanto el abi del
+import myAbiJson from './abi_contracts/QuiniBlockContract.sol/QuiniBlockContract.json';
+const abi = myAbiJson.abi;
 
-const abi = parseAbi([
-    'event TicketPurchased(uint32 ticketId, uint32 drawId, address buyer)',
-    'event DrawStarted(uint32 drawId,uint256 _primaryPot);)',
-    'function startDraw()',    
-    'function setPotValues(uint256 _primaryPot, uint256 _secondaryPot, uint256 _reservePot) payable',
-    'function purchaseTicket(uint32[6] _chosenNumbers) payable',
-    'function emitDraw(uint32[6] memory _winningNumbers)'
-]);
+// console.log(abi);
 
 export function useComprarTicket() {
-    const wcComprarTicket = useWriteContract({ chainId: 5777 });
-    const wfComprarTicket = useWaitForTransactionReceipt({ hash: wcComprarTicket.data });
-
-    const comprarTicket = async (address, numerosOrdenados, setTicketID) => {
-        registrarEventos(setTicketID,wcComprarTicket);
-        wcComprarTicket.writeContract({
-            address: address,
-            abi: abi,
-            functionName: 'purchaseTicket',
-            args: [numerosOrdenados],
-            value: parseEther('1')
-        });
+    const wcComprarTicket = useWriteContract(config);
+    const wfComprarTicket = useWaitForTransactionReceipt({hash: wcComprarTicket.data,config});
+    
+    const comprarTicket = async (address, numerosOrdenados, setTicketID, ticketPrice) => {
+        const priceInEther = parseEther(ticketPrice); //tienen que llegar en formato bigint de 18 decimales para 1 eth?
+        try {
+            wcComprarTicket.writeContract({
+                address: address,
+                abi: abi,
+                functionName: 'purchaseTicket',
+                args: [numerosOrdenados],
+                value: priceInEther
+            });
+            
+        } catch (error) {
+            console.error('Error fetching comprarTicket:', error);
+        }
+        //registrarEventos(setTicketID);
+        
     };
-
-    return { comprarTicket, wcComprarTicket, wfComprarTicket };
-}
-
-
-export async function registrarEventos(setTicketID,  wcComprarTicket) {
-    try {
-        await watchContractEvent(config, {
-            address: `${window.CONTRACT_ADDRESS}`,
-            abi: abi,
-            eventName: 'TicketPurchased',
-            onLogs(logs) {
-                if (logs[0].args.transactionHash === wcComprarTicket.data) {
-                    setTicketID(logs[0].args.ticketId);
-                }
-            },
-        });
-    } catch (error) {
-        console.error('Error fetching transaction:', error);
+    const registrarEventos = async (setTicketID) =>{
+        try {
+            const {data}  = wcComprarTicket
+            console.log('registrarEventos TicketPurchased');
+            await watchContractEvent(config, {
+                address: `${window.CONTRACT_ADDRESS}`,
+                abi: abi,
+                config, //para que tome el chainId correcto
+                eventName: '*** TicketPurchased (uint32 ticketId, uint32 drawId, address buyer)', //lo copie del registro de eventos
+                onLogs(logs) {
+                    console.log(data.toUpperCase());
+                    if (logs[0].transactionHash.toUpperCase() === data.toUpperCase()) {
+                        setTicketID(logs[0].args.ticketId);
+                    }
+                },
+            });
+        } catch (error) {
+            console.error('Error fetching transaction:', error);
+        }
     }
+
+    return { comprarTicket, wcComprarTicket, wfComprarTicket};
 }
+
 
 export function useInicializarSorteo() {
-    const wcInicializarSorteo= useWriteContract({ chainId: 5777 });
+    const wcInicializarSorteo= useWriteContract({ chainId: 8002});
     const wfInicializarSorteo = useWaitForTransactionReceipt({ hash: wcInicializarSorteo.data });
 
     const inicializarSorteo = async (address,setSorteoID) => {
@@ -69,13 +75,21 @@ export function useInicializarSorteo() {
 
 export async function registrarEventosSorteo(setSorteoID,wcInicializarSorteo) {
     try {
+        const transactionHash = wcInicializarSorteo.data ? wcInicializarSorteo.data.toString() : null;
+
         await watchContractEvent(config, {
             address: `${window.CONTRACT_ADDRESS}`,
             abi: abi,
             eventName: 'DrawStarted',
             onLogs(logs) {
-                if (logs[0].args.transactionHash === wcInicializarSorteo.data) {
-                    setSorteoID(logs[0].args.drawId);
+                if (logs[0].args.transactionHash === transactionHash) {
+                    const drawId = logs[0].args.drawId;
+                    // Verificar si drawId es un BigNumber y convertirlo a un número o string
+                    if (drawId) {
+                        setSorteoID(drawId.toNumber ? drawId.toNumber() : drawId); // Conversión de BigNumber a entero
+                    } else {
+                        setSorteoID(null); // Si no hay drawId, se maneja como null
+                    }
                 }
             },
         });
@@ -85,7 +99,7 @@ export async function registrarEventosSorteo(setSorteoID,wcInicializarSorteo) {
 }
 
 // export function useInicializarSorteo() {
-//     const wcInicializarSorteo = useWriteContract({ chainId: 5777 });
+//     const wcInicializarSorteo = useWriteContract({ chainId: 8002});
 //     const wfInicializarSorteo = useWaitForTransactionReceipt({ hash: wcInicializarSorteo.data });
 
 //     const inicializarSorteo = (address) => {
@@ -102,7 +116,7 @@ export async function registrarEventosSorteo(setSorteoID,wcInicializarSorteo) {
 
 
 export function useSetearPozos() {
-    const wcSetearPozos = useWriteContract({ chainId: 5777 });
+    const wcSetearPozos = useWriteContract({ chainId: 8002});
     const wfSetearPozos = useWaitForTransactionReceipt({ hash: wcSetearPozos.data });
 
     const setearPozos = (address, pozoPrimario, pozoSecundario, reservePot) => {
@@ -121,7 +135,7 @@ export function useSetearPozos() {
 }
 
 export function useFinalizarSorteo() {
-    const wcFinalizarSorteo = useWriteContract({ chainId: 5777 });
+    const wcFinalizarSorteo = useWriteContract({ chainId: 8002});
     const wfFinalizarSorteo = useWaitForTransactionReceipt({ hash: wcFinalizarSorteo.data });
 
     const finalizarSorteo = (address, numerosGanadores) => {
