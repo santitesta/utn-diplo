@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Card, Row, Col, Form } from "react-bootstrap";
+import { Card, Row, Col, Form, Button } from "react-bootstrap";
 import NumberInput from '../../components/NumberInput/NumberInput';
 import { AiOutlineCaretRight, AiOutlinePause } from "react-icons/ai";
 import PersonalizedDialog from '../PersonalizedDialog/PersonalizedDialog';
-import { useInicializarSorteo, useFinalizarSorteo } from '../../services/contractService';
+import axios from 'axios';
+
+import { useInicializarSorteo } from '../../services/iniciarSorteoService';
+import { useFinalizarSorteo } from '../../services/finalizarSorteoService';
 
 function SorteoCard({ estadoContrato, isConnected }) {
   const [isSorteoActivo, setIsSorteoActivo] = useState(false);
@@ -13,10 +16,10 @@ function SorteoCard({ estadoContrato, isConnected }) {
   const [numerosGanadores, setNumerosGanadores] = useState(Array(count).fill(null));
   const [validityState, setValidityState] = useState(Array(count).fill(true));
 
-  const { inicializarSorteo, wcInicializarSorteo, wfInicializarSorteo } = useInicializarSorteo();
-  const { finalizarSorteo, wcFinalizarSorteo, wfFinalizarSorteo } = useFinalizarSorteo();
+  const { inicializarSorteo, returnedSorteoID:newSorteoId, isSuccess:iisSuccess, isPending:iisPending, hash:ihash,isError:iisError, errorMessage:ierrorMessage } = useInicializarSorteo();
+  const { finalizarSorteo, returnedWinners:freturnedWinners, isSuccess:fisSuccess, isPending:fisPending, hash:fhash,isError:fisError, errorMessage:ferrorMessage } = useFinalizarSorteo();
 
-  const [newSorteId, setNewSorteId] = useState(null);
+  //const [newSorteoId, setnewSorteoId] = useState(null);
 
   useEffect(() => {
     if (estadoContrato) {
@@ -27,13 +30,24 @@ function SorteoCard({ estadoContrato, isConnected }) {
   }, [estadoContrato]);
 
   useEffect(() => {
-    if (wfInicializarSorteo.isSuccess && !sorteoIniciado) {
+    const array_nulo = Array(count).fill(null);
+    if (iisSuccess && !sorteoIniciado && newSorteoId>0) {
       console.log(`Inicio de Sorteo Exitoso.`);
       setSorteoShow(false);
-      alert(`Inicio de Sorteo Exitoso.`);
-      setSorteoIniciado(true);
+      alert(`Inicio de Sorteo Exitoso. Sorteo Numero: ${newSorteoId}`);
+      axios.post(`${window.URL_BACKEND}/sorteos/iniciar`, {
+        drawId: newSorteoId,
+      }).then(response => {
+        setNumerosGanadores(array_nulo);
+        setSorteoIniciado(true);  
+      })
+      .catch(error => {
+        // Manejar el error en caso de fallo
+        console.error('Error al iniciar el sorteo:', error);
+      });
+      
     }
-  }, [wfInicializarSorteo, sorteoIniciado]);
+  }, [iisSuccess, sorteoIniciado,newSorteoId]);
 
   useEffect(() => {
     const array_nulo = Array(count).fill(null);
@@ -41,13 +55,22 @@ function SorteoCard({ estadoContrato, isConnected }) {
       .flat()
       .reduce((acc, num) => acc + num, 0);
 
-    if (wfFinalizarSorteo.isSuccess && sumaTotal > 0) {
-      alert(`Se finalizó el sorteo. Ganadores números: [${numerosGanadores}]. Me falta generar el historial.`);
+    if (fisSuccess && sumaTotal > 0 && freturnedWinners) {
+      alert(`Se finalizó el sorteo. Ganadores números: [${numerosGanadores}].`);
+
+      axios.put(`${window.URL_BACKEND}/sorteos/finalizar`, {
+        drawId: estadoContrato.sorteo.numero, 
+        numerosGanadores: numerosGanadores,
+        pozoSorteado: estadoContrato.pozo.primario,
+        cantGanadores: freturnedWinners.length,
+        maxNroTicket: (estadoContrato.contrato.contadorTicket -1), //en estado esta el numero que se va a agregar al contrato o proximo id
+      });
+
       setNumerosGanadores(array_nulo);
       setSorteoShow(false);
       setSorteoIniciado(false);
     }
-  }, [wfFinalizarSorteo]);
+  }, [fisSuccess,freturnedWinners]);
 
   const handleInputChange = (index, value) => {
     const newNumeros = [...numerosGanadores];
@@ -81,7 +104,7 @@ function SorteoCard({ estadoContrato, isConnected }) {
   const handleIniciarSorteo = () => {
     if (isConnected) {
       console.log(`Inicializando`);
-      inicializarSorteo(`${window.CONTRACT_ADDRESS}`,setNewSorteId);
+      inicializarSorteo(`${window.CONTRACT_ADDRESS}`);
     } else {
       console.log(`Debe iniciar sesión para inicializar un Sorteo.`);
     }
@@ -89,16 +112,31 @@ function SorteoCard({ estadoContrato, isConnected }) {
 
   const handleFinalizoSorteo = () => {
     if (validateNumbers()) {
-      console.log(`Se finalizó el sorteo. Ganadores números: [${numerosGanadores}]`);
-      let numerosOrdenados = [...numerosGanadores].sort((a, b) => a - b);
+      console.log(`Finalizando Sorteo. Seteo numeros ganadores: [${numerosGanadores}]`);
       if (isConnected) {
-        finalizarSorteo(`${window.CONTRACT_ADDRESS}`, numerosOrdenados);        
+        finalizarSorteo(`${window.CONTRACT_ADDRESS}`, numerosGanadores);        
       } else {
         console.log("Sin conexión.");
       }
     } else {
       console.log("Uno o más números son inválidos.");
     }
+  };
+
+  const setRandonNumbers = ()=>{
+    const array_random = generateRandomNumbers(); // Generar los números aleatorios
+    setNumerosGanadores(array_random);
+  }
+
+  const generateRandomNumbers = () => {
+    const numbers = [];
+    while (numbers.length < 6) {
+      const randomNumber = Math.floor(Math.random() * 45) + 1;
+      if (!numbers.includes(randomNumber)) {
+        numbers.push(randomNumber);
+      }
+    }
+    return numbers;
   };
 
   return (
@@ -114,7 +152,7 @@ function SorteoCard({ estadoContrato, isConnected }) {
           primaryLabel={isSorteoActivo ? 'Finalizar' : 'Iniciar'}
           secondaryLabel="Cancel"
           showDialog={sorteoShow}
-          isLoading={isSorteoActivo ? (wfFinalizarSorteo?.isConfirming || wcFinalizarSorteo?.isPending) : (wfInicializarSorteo?.isConfirming || wcInicializarSorteo?.isPending)}
+          isLoading={isSorteoActivo ? ( fisPending) : (iisPending)}
           buttonIcon={isSorteoActivo ? AiOutlinePause : AiOutlineCaretRight}
         >
           {isSorteoActivo ? (
@@ -131,6 +169,9 @@ function SorteoCard({ estadoContrato, isConnected }) {
                         />
                   </Col>
                 ))}
+              </Row>
+              <Row>
+                  <Button onClick={setRandonNumbers}>Sortear Random</Button>
               </Row>
             </>
           ) : (

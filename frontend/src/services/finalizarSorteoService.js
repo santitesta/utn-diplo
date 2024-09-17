@@ -1,39 +1,31 @@
-// comprarTicketService.js
+// finalizarSorteoService.js
 import { useState, useEffect } from 'react';
 import { 
-    BaseError,
     useWaitForTransactionReceipt, 
     useWriteContract 
   } from 'wagmi'
-import { parseEther,parseGwei } from 'viem';
 
 import { config } from '../config/wagmi';
 import { watchContractEvent } from '@wagmi/core';
 import myAbiJson from './abi_contracts/QuiniBlockContract.sol/QuiniBlockContract.json';
 const abi = myAbiJson.abi;
 
-export function useComprarTicket() {
-    // const [enConfirmacion, setEnConfirmacion] = useState(false);
-    const [ticketID, setTicketID] = useState(null);
+export function useFinalizarSorteo() {
+    const [winners, setWinners] = useState([]);
     const [isPending, setIsPending] = useState(false);
     const { data: hash, writeContract, error ,isError,isPending:wcPending ,isSuccess} = useWriteContract(config);
     const {isSuccess:wftSuccess, isPending:wftPending}= useWaitForTransactionReceipt({ hash, config });
-    const [returnedTicketID, setReturnedTicketID] = useState(null);
+    const wft= useWaitForTransactionReceipt({ hash, config });
+
+    const [returnedWinners, setReturnedWinners] = useState([]);
     const [transactionHash, setTransactionHash] = useState(null);
     const [errorMessage  , setErrorMessage ] = useState(null);
 
-
-    const unwatchEvent = watchContractEvent(config, {
-      address: `${window.CONTRACT_ADDRESS}`,
-      abi: abi,      eventName: '*** TicketPurchased (uint32 ticketId, uint32 drawId, address buyer)',
-      strict: true, 
-      onLogs(logs) {
-        //console.log('New *** TicketPurchased', logs)
-        setTransactionHash(logs[0].transactionHash)
-        setTicketID(logs[0].args.ticketId.toString()); 
-      },
-    })
-
+    // useEffect(() => {
+    //     if(wft.data){
+    //         console.log('wft finalizar',wft);
+    //     }
+    // },[wft]);
     //logica de pendiente
     useEffect(() => {
         //inicia cuando mando a firmar la tx
@@ -47,46 +39,54 @@ export function useComprarTicket() {
             setIsPending(false);
         }
         
-
-
     }, [wcPending,wftPending]);
 
+    const unwatchEventFinalizar = watchContractEvent(config, {
+      address: `${window.CONTRACT_ADDRESS}`,
+      abi: abi,      
+      eventName: '*** DrawDone (uint32 drawId, uint256 drawDate, uint32[6] winningNumbers, address[] winners)',
+      strict: true, 
+      onLogs(logs) {
+        if(logs[0].eventName == "DrawDone"){
+            setTransactionHash(logs[0].transactionHash)
+            setWinners(logs[0].args.winners.toString()); 
+        }
+      },
+    })
+
     useEffect(() => {
-        if(transactionHash&&ticketID&&hash)
+        if(transactionHash&&winners&&hash)
         {
             if(hash.toUpperCase() == transactionHash.toUpperCase())
             {
-                setReturnedTicketID(ticketID);
+                setReturnedWinners(winners);
             }
         }
-    }, [hash,ticketID,transactionHash]);
+    }, [hash,winners,transactionHash]);
    
     useEffect(() => {
         if(isError){
-            //console.log(error);
-            setReturnedTicketID(-1);
+            setReturnedWinners([0x00]);
             setErrorMessage(error);
         }
-        //console.log(isError )
     }, [error,isError]);
-    // Función para comprar el ticket
-    const comprarTicket = async (address, numerosOrdenados, ticketPrice) => {
-        const priceInEther = parseEther(ticketPrice);
+    
+
+    const finalizarSorteo = async (address, numerosGanadores)=> {
+        let numerosOrdenados = [...numerosGanadores].sort((a, b) => a - b);
         try {
-            
             await writeContract({
                 address: address,
                 abi: abi,
-                functionName: 'purchaseTicket',
+                functionName: 'emitDraw',
                 args: [numerosOrdenados],
-                value: priceInEther,  
             });
-            unwatchEvent();
+            unwatchEventFinalizar();
         } catch (error) {
-            console.error('Error en comprarTicket:', error);
+            console.error('Error en finalizarSorteo:', error);
         }
         
     };
 
-    return { comprarTicket, returnedTicketID, isSuccess, isPending, hash,isError, errorMessage,wftSuccess,wftPending };
+    return { finalizarSorteo, returnedWinners, isSuccess, isPending, hash,isError, errorMessage };
 }

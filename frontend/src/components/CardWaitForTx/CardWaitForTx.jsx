@@ -49,10 +49,10 @@ CardWaitForTx.propTypes = {
         PropTypes.string,
         PropTypes.oneOf([null])
     ]),
-    error: PropTypes.oneOfType([
-        PropTypes.array,
-        PropTypes.oneOf([null])
-    ]),
+    // error: PropTypes.oneOfType([
+    //     PropTypes.array,
+    //     PropTypes.oneOf([null])
+    // ]),
     title: PropTypes.string.isRequired,
     children: PropTypes.node.isRequired,
     isPending: PropTypes.bool,

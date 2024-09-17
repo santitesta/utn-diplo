@@ -6,18 +6,16 @@ import Account from '../Web3/Account';
 import { Connect } from '../Web3/Connect';
 import CardTicket from "../CardTicket/CardTicket";
 import axios from 'axios';
-import {
-    useComprarTicket,
-    //registrarEventos
-} from '../../services/contractService';
-import {
-    useComprarTicket as useComprarTicket2,
-    //registrarEventos
-} from '../../services/comprarTicketService';
 
+import {
+    useComprarTicket ,
+} from '../../services/comprarTicketService';
 
 import useContractInfo from "../../hooks/useContractInfo";
 //icono
+import { GiPerspectiveDiceSixFacesRandom } from "react-icons/gi";
+
+
 function SorteoActual({ sorteoID }) {
     const { isConnected, address } = useAccount();
     const { estadoContrato} = useContractInfo();
@@ -25,8 +23,7 @@ function SorteoActual({ sorteoID }) {
     const count = 6;
     const [numeros, setNumeros] = useState(Array(count).fill(null));
     const [registroID, setRegistroID] = useState(null);
-   // const {  wcComprarTicket, wfComprarTicket } = useComprarTicket();
-    const { comprarTicket, returnedTicketID:ticketID ,isSuccess,hash ,errorMessage,isPending,isError } = useComprarTicket2();
+    const { comprarTicket, returnedTicketID:ticketID ,isSuccess,hash ,errorMessage,isPending,isError } = useComprarTicket();
 
     const handleComprarTicket = async () => {
         console.log(`Trata de comprar ticket con números [${numeros}]`);
@@ -77,14 +74,21 @@ function SorteoActual({ sorteoID }) {
         }
     }, [errorMessage, ticketID]);
 
-    // useEffect(() => {
+    const setRandonNumbers = ()=>{
+        const array_random = generateRandomNumbers(); // Generar los números aleatorios
+        setNumeros(array_random);
+      }
+    const generateRandomNumbers = () => {
+        const numbers = [];
+        while (numbers.length < 6) {
+          const randomNumber = Math.floor(Math.random() * 45) + 1;
+          if (!numbers.includes(randomNumber)) {
+            numbers.push(randomNumber);
+          }
+        }
+        return numbers;
+    };
 
-        
-    //     console.log('isPending',isPending);
-    //     console.log('isError',isError);
-    //     console.log('isSuccess',isSuccess);
-
-    // }, [isPending, isSuccess,isError]);
     return (
         <Row>
             <Col className="d-grid gap-2">
@@ -102,7 +106,11 @@ function SorteoActual({ sorteoID }) {
                     error={isError?errorMessage:null}
                     hash={hash}
                 >                
-                    {isConnected ? 
+                    {isConnected ? <>
+                        <Button variant="success" className="me-2" onClick={setRandonNumbers}>
+                            <GiPerspectiveDiceSixFacesRandom size={25} />
+                            Probar Suerte 
+                        </Button>
                         <Button 
                             variant="primary" 
                             type="submit"  
@@ -110,6 +118,7 @@ function SorteoActual({ sorteoID }) {
                             >
                                 Comprar Ticket ({precio})
                         </Button>
+                        </>
                         : 
                         <Connect/> 
                     } 
