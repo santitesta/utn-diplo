@@ -3,14 +3,15 @@ const cors = require('cors');
 const app = express();
 const fs = require("fs");
 const mysql = require('mysql2'); // Asegúrate de que esta línea esté presente
-const port = 3000
+const port = 5000
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 // Configura CORS para permitir solicitudes desde cualquier origen
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:5174']
 }));
+
 
 /*  Configuracion para interacutuar con un SmartContract */
 const { ethers } = require('ethers');
@@ -31,13 +32,12 @@ const contract = new ethers.Contract(contractAddress, contractABI, provider);
 
 
 //CONEXION A LA BASE DE DATOS
-// Conexión a la base de datos
 const connection = mysql.createConnection({
-    host: '127.0.0.1',
-    user: 'fiveblocks',
-    password: 'password.24!',
-    database: 'quiniblockDB',
-    port: 33066 // El puerto 3306 es el predeterminado de MySQL pero se podria cambiar por el docker
+    host: process.env.DB_HOST || '127.0.0.1',
+    user: process.env.DB_USER || 'fiveblocks',
+    password: process.env.DB_PASSWORD || 'password.24!',
+    database: process.env.DB_NAME || 'quiniblockDB',
+    port: process.env.DB_PORT || 33066
 });
 
 connection.connect((err) => {
@@ -57,7 +57,6 @@ app.listen(port, () => {
 app.get('/estadoContrato', async (req, res) => {
     try {
         const contractState = await contract.getContractState();
-        
         const ticketPriceInEth = ethers.formatEther(contractState._ticketPrice);
         const primaryPotInEth = ethers.formatEther(contractState._primaryPot);
         const secondaryPotInEth = ethers.formatEther(contractState._secondaryPot);
@@ -65,6 +64,27 @@ app.get('/estadoContrato', async (req, res) => {
         const balanceInEth = ethers.formatEther(contractState._balance);
         const basePotValueInEth = ethers.formatEther(contractState._basePotValue);
     
+
+        let ultimoSorteoId = BigInt(contractState._currentDrawId);
+        let ultimoSorteo = await contract.getDraw(ultimoSorteoId);
+
+        if (ultimoSorteo.drawDate > 0n) {
+            //console.log('No hay sorteo en Curso. Finalizado.');
+        } else {
+            //console.log('Sorteo en Curso');
+            ultimoSorteoId = ultimoSorteoId - 1n;
+            ultimoSorteo = await contract.getDraw(ultimoSorteoId);
+        }
+        // Convertir `ultimoSorteo` a un formato legible
+        //console.log('Ultimo Sorteo');
+        const drawDate = new Date(Number(ultimoSorteo.drawDate) * 1000);
+        const drawDateGmtMinus3 = drawDate.toLocaleString("es-AR", { timeZone: "America/Argentina/Buenos_Aires" });
+        //console.log(`Fecha: ${drawDateGmtMinus3}`);
+        const winningNumbers = ultimoSorteo.winningNumbers.map(num => Number(num));
+        //console.log(`Numeros Ganadores: [${winningNumbers}]`);
+        const winners = ultimoSorteo.winners;
+        //console.log(`Address Ganadores: [${winners}]`);
+
         res.json({
             contrato: {
                 owner: contractState._owner,
@@ -74,6 +94,15 @@ app.get('/estadoContrato', async (req, res) => {
                 contadorTicket: contractState._ticketCount.toString(),
                 isDrawActive: contractState._isDrawActive,
                 isPaused: contractState._isContractPaused,
+            },
+            sorteo: {
+                numero: contractState._currentDrawId.toString(),
+                anterior: {
+                    numero: ultimoSorteoId.toString(),
+                    drawDate: drawDateGmtMinus3,
+                    winningNumbers: winningNumbers,
+                    winners: winners
+                }
             },
             pozo: {
                 primario: primaryPotInEth,
@@ -91,7 +120,7 @@ app.post('/registrarCompra', async (req, res) => {
     try {
         const { chosenNumbers, drawId, ownerAddress } = req.body;
         // La consulta SQL (sin hash y estado pendiente)
-        const query = 'INSERT INTO ticketsvendidos (numeros_elegidos, Fecha, Nro_Sorteo, owner) VALUES (?, NOW(), ?, ?)';
+        const query = 'INSERT INTO ticketsvendidos (numeros_elegidos, Fecha, sorteo_id, owner) VALUES (?, NOW(), ?, ?)';
         const values = [
             JSON.stringify(chosenNumbers), // Convierte el array a string para almacenarlo en la BD
             drawId,
@@ -121,11 +150,12 @@ app.post('/registrarCompra', async (req, res) => {
 app.put('/actualizarCompra/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { txHash, estado, ticketID } = req.body;
+        const { txHash, estado, ticketID, errorMessage } = req.body;
 
+        console.log(req.body);
         // Actualizar el registro en la base de datos con el hash de la transacción y el estado
-        const query = 'UPDATE ticketsvendidos SET tx_hash = ?, estado = ?, ticketID= ? WHERE id = ?';
-        const values = [txHash, estado,ticketID, id];
+        const query = 'UPDATE ticketsvendidos SET tx_hash = ?, estado = ?, ticketID = ? WHERE id = ?';
+        const values = [txHash, estado, ticketID, id];
 
         connection.query(query, values, (err, results) => {
             if (err) {
@@ -140,7 +170,25 @@ app.put('/actualizarCompra/:id', async (req, res) => {
             }
 
             console.log('Transacción actualizada correctamente:', results);
-            res.status(200).send('Transacción actualizada correctamente');
+
+            // Si hay un errorMessage, insertar en la tabla correspondiente
+            if (errorMessage) {
+                const query_fail = 'INSERT INTO errorMessage (tx_id, error) VALUES (?, ?)';
+                const values_fail = [id, errorMessage];
+
+                connection.query(query_fail, values_fail, (err, results) => {
+                    if (err) {
+                        console.error('Error salvando el mensaje de error:', err);
+                        res.status(500).send('Error al guardar el mensaje de error');
+                        return;
+                    }
+
+                    console.log('Mensaje de error guardado correctamente:', results);
+                    res.status(200).send('Transacción y mensaje de error actualizados correctamente');
+                });
+            } else {
+                res.status(200).send('Transacción actualizada correctamente');
+            }
         });
     } catch (error) {
         console.error('Error al procesar la solicitud:', error);
@@ -176,15 +224,49 @@ app.get('/estadoContratoEstatico', (req, res) => {
     res.json(staticData);
 });
 
-app.post('/iniciarSorteo', async (req, res) => {
+
+app.get('/historial/:address', async (req, res) => {
     try {
-        // Insertar un nuevo sorteo con la fecha de inicio actual
-        const query = 'INSERT INTO sorteos (fechaInicio) VALUES (NOW())';
-        
-        connection.query(query, (err, results) => {
+        const { address } = req.params;
+
+        const query = 'SELECT * FROM ticketsvendidos WHERE owner = ? ORDER By ticketID desc';
+        const values = [
+            address, 
+        ];
+
+        connection.query(query, values, (err, results) => {
             if (err) {
-                console.error('Error al iniciar el sorteo en la base de datos:', err);
-                res.status(500).send('Error al iniciar el sorteo en la base de datos');
+                console.error('Error al insertar los datos en la base de datos:', err);
+                res.status(500).send('Error al registrar la transacción en la base de datos');
+                return;
+            }
+
+            // `results.insertId` contiene el ID del registro insertado
+            console.log('Transacción registrada correctamente:', results);
+            res.status(200).json({
+                message: 'Historial de transacciones',
+                historial: results // Devolver el ID insertado
+            });
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error al interactuar con el contrato');
+    }
+})
+
+
+app.post('/sorteos/iniciar', async (req, res) => {
+    try {
+        const { drawId } = req.body;
+        // Insertar un nuevo sorteo con la fecha de inicio actual
+        const query = 'INSERT INTO sorteos (id,fechaInicio) VALUES (?,NOW())';
+        
+        const values = [drawId];
+
+        connection.query(query, values, (err, results) => {
+            if (err) {
+                console.error('Error el consultar la base de datos:', err);
+                res.status(500).send('Error el consultar la base de datos');
                 return;
             }
 
@@ -201,9 +283,9 @@ app.post('/iniciarSorteo', async (req, res) => {
     }
 });
 
-app.post('/finalizarSorteo', async (req, res) => {
+app.put('/sorteos/finalizar', async (req, res) => {
     try {
-        const { drawId, numerosGanadores } = req.body;
+        const { drawId, numerosGanadores, pozoSorteado, cantGanadores,maxNroTicket } = req.body;
 
         // Verificar que se envíen los números ganadores y el ID del sorteo
         if (!drawId || !numerosGanadores) {
@@ -216,10 +298,10 @@ app.post('/finalizarSorteo', async (req, res) => {
         // Actualizar el sorteo con la fecha de finalización y los números ganadores
         const query = `
             UPDATE sorteos 
-            SET fechaFin = NOW(), numerosGanadores = ? 
+            SET fechaFin = NOW(), numerosGanadores = ?, pozoSorteado = ? , cantGanadores = ?, maxNroTicket= ?
             WHERE id = ?
         `;
-        const values = [numerosGanadoresStr, drawId];
+        const values = [numerosGanadoresStr, pozoSorteado,cantGanadores,maxNroTicket,drawId];
 
         connection.query(query, values, (err, results) => {
             if (err) {
@@ -235,12 +317,36 @@ app.post('/finalizarSorteo', async (req, res) => {
 
             console.log('Sorteo finalizado correctamente:', results);
             res.status(200).json({
-                message: 'Sorteo finalizado correctamente',
-                drawId: drawId
-            });
+                message: 'Sorteo finalizado correctamente'
+             });
         });
     } catch (error) {
         console.error('Error al procesar la solicitud:', error);
         res.status(500).send('Error interno del servidor');
     }
 });
+
+
+app.get('/sorteos/historial', async (req, res) => {
+    try {
+        const query = 'SELECT * FROM sorteos WHERE fechaFin > 0 ORDER By id DESC';
+
+        connection.query(query,  (err, results) => {
+            if (err) {
+                console.error('Error el consultar la base de datos:', err);
+                res.status(500).send('Error el consultar la base de datos');
+                return;
+            }
+
+            // `results.insertId` contiene el ID del registro insertado
+            console.log('Transacción registrada correctamente:', results);
+            res.status(200).json({
+                message: 'Historial de Sorteos',
+                historial: results // Devolver el ID insertado
+            });
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error al interactuar con la base de datos');
+    }
+})

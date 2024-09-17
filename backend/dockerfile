@@ -1,5 +1,5 @@
 # Use the official Node.js image as the base image
-FROM node:18-alpine
+FROM node:20-alpine
 
 # Set the working directory
 WORKDIR /app
@@ -16,5 +16,5 @@ COPY . .
 # Expose the port the server will run on
 EXPOSE 5000
 
-# Start the server
-CMD ["node", "index.js"]  # Replace 'index.js' with your server's entry point file
+# Start the server with a delay of 3 second to wait for db
+CMD ["sh", "-c", "sleep 3 && node src/index.js"]
