@@ -1,48 +1,36 @@
 import React, { useState, useEffect } from "react";
-import Preloader from "../src/components/Pre";
-import Navbar from "./components/Navbar";
-import Home from "./components/Home/Home";
-import MemberShips from "./components/MemberShips/MemberShips";
-import Footer from "./components/Footer";
-import History from "./components/History/HistoryNew";
-import Play from "./components/Play/Play";
-import {
-  BrowserRouter as Router,
-  Route,
-  Routes,
-  Navigate
-} from "react-router-dom";
-import ScrollToTop from "./components/ScrollToTop";
-import "./style.css";
-import "./App.css";
+import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
+
+//PAGINAS
+import Home from "./pages/Home/Home";
+import MemberShips from "./pages/MemberShips/MemberShips";
+import History from "./pages/History/HistoryNew";
+import Play from "./pages/Play/Play";
+import Admin from "./pages/Admin/Admin";
+
+//COMPONENTES
+import Layout from "./components/Layout/Layout";
+import ScrollToTop from "./components/ScrollToTop/ScrollToTop";
+
+//CSS
+import "./styles/themes.css";
+import "./styles/App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function App() {
-  const [load, upadateLoad] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      upadateLoad(false);
-    }, 1200);
-
-    return () => clearTimeout(timer);
-  }, []);
-
   return (
     <Router>
-      <Preloader load={load} />
-      <div className="App" id={load ? "no-scroll" : "scroll"}>
-        <Navbar />
-        <ScrollToTop />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/play" element={<Play />} />
-          <Route path="/memberships" element={<MemberShips />} />
-          <Route path="/history" element={<History />} />
-          <Route path="*" element={<Navigate to="/"/>} />
-        </Routes>
-        <Footer />
-      </div>
+      <ScrollToTop />
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Home />} />
+          <Route path="play" element={<Play />} />
+          {/* <Route path="memberships" element={<MemberShips />} /> Funcionalidad FUTURA */} 
+          <Route path="admin" element={<Admin />} />
+          <Route path="history" element={<History />} />
+          <Route path="*" element={<Navigate to="/" />} />
+        </Route>
+      </Routes>
     </Router>
   );
 }

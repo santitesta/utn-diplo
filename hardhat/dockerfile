@@ -1,0 +1,26 @@
+# Use the official Node.js image as the base image
+FROM node:18-alpine
+
+# Set the working directory
+WORKDIR /app
+
+# Copy package.json and package-lock.json (if available)
+COPY package*.json ./
+
+# Install dependencies
+RUN npm install
+
+# Install Truffle or Hardhat globally if needed
+RUN npm install -g truffle   # Use this line for Truffle
+# RUN npm install -g hardhat # Use this line for Hardhat if using Hardhat instead
+
+# Copy the rest of the application code
+COPY . .
+
+# Expose a port if needed (e.g., for local blockchain network)
+EXPOSE 7545
+# Example for Ganache CLI, modify if needed
+
+# Default command (adjust based on your needs)
+CMD ["truffle", "migrate"]  # For Truffle migration
+# CMD ["npx", "hardhat", "node"] # For running a Hardhat network, if using Hardhat

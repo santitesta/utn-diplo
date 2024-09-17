@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/Pausable.sol";
+import "./QuiniBlockPotManager.sol";
 
-import "./QuiniBlockUtils.sol";
 
-contract QuiniBlockContract is Ownable, Pausable, QuiniBlockUtils {
+contract QuiniBlockContract is QuiniBlockPotManager{
     struct Ticket {
         uint32[6] chosenNumbers;
         address buyer;
@@ -19,9 +17,7 @@ contract QuiniBlockContract is Ownable, Pausable, QuiniBlockUtils {
         address[] winners;
     }
 
-    uint256 public primaryPotValue;
-    uint256 public secondaryPotValue;
-    uint256 public ticketPrice = 0.001 ether;
+    uint256 public ticketPrice;
 
     mapping(uint32 => Ticket) public tickets;
     uint32 public ticketCount;
@@ -29,22 +25,31 @@ contract QuiniBlockContract is Ownable, Pausable, QuiniBlockUtils {
     mapping(uint32 => Draw) public draws;
     uint32 public currentDrawId;
 
+    bool public isDrawActive;
+
     // Events
-    event SetPotValues(uint256 _primaryPotValue, uint256 _secondaryPotValue);
-    event DrawStarted(uint32 drawId,uint256 _primaryPotValue);
+    event DrawStarted(uint32 drawId,uint256 _primaryPot);
     event TicketPurchased(uint32 ticketId, uint32 drawId, address buyer); // Modified event
     event DrawDone(uint32 drawId,  uint256 drawDate,uint32[6] winningNumbers,address[] winners);
+    event SetTicketPrice(uint256 _ticketPriceInWei);
 
-    //constructor for Ownable
-    constructor(address initialOwner) Ownable(initialOwner) {}
+    function initialize(uint256 _basePotValue, address initialOwner) public initializer override{
+        // Llama a la función initialize del contrato padre
+        super.initialize(_basePotValue, initialOwner);
+
+        // Inicializa la variable isDrawActive a false
+        isDrawActive = false;
+        currentDrawId = 1;
+        ticketPrice= 0.001 ether;
+    }
 
     // Function to purchase a ticket
-    function purchaseTicket(uint32[6] memory _chosenNumbers) public payable whenNotPaused {
-        // Check if the sent value is equal to the ticket price
+    // Using OpenZeppelin's nonReentrant to prevent two transactions from interfering with each other
+    function purchaseTicket(uint32[6] memory _chosenNumbers) public payable nonReentrant whenNotPaused {
+        // // Check if the sent value is equal to the ticket price
+        require(isDrawActive, "No active draw available for ticket purchase");
         require(msg.value == ticketPrice, "Incorrect Ether value sent");
-        require(currentDrawId > 0, "No draw has been initiated yet");
         require(areValidNumbers(_chosenNumbers), "Chosen numbers must be between 0 and 45");
-        require(draws[currentDrawId].drawDate == 0, "No active draw with the current draw ID");
 
         uint32[6] memory orderChosenNumbers = orderNumbers(_chosenNumbers);
         tickets[ticketCount] = Ticket({
@@ -55,40 +60,48 @@ contract QuiniBlockContract is Ownable, Pausable, QuiniBlockUtils {
 
         emit TicketPurchased(ticketCount, currentDrawId, msg.sender); // Emit modified event
         ticketCount++;
+        // //incremento los pozos
+        incrementPots(ticketPrice);
     }
-
+    
     // Function to start a new draw
-    function startDraw(uint256 _primaryPotValue, uint256 _secondaryPotValue) public onlyOwner whenNotPaused {
-        require(_primaryPotValue > 0 , "Requires that the primary Pot not be null");
-        currentDrawId++;
-        setPotValues(_primaryPotValue, _secondaryPotValue);
-        emit DrawStarted(currentDrawId, _primaryPotValue);
+    function startDraw() public onlyOwner whenNotPaused isPrimaryPotAvailable{
+        require(!isDrawActive, "There is already an active draw in progress"); // Verifica si hay un sorteo activo
+        isDrawActive = true; // Marca el sorteo como activo        currentDrawId++;
+        emit DrawStarted(currentDrawId, primaryPot);
     }
 
     // Function that issues the draw and distributes the prize
     function emitDraw(uint32[6] memory _winningNumbers) public onlyOwner whenNotPaused {
+        require(isDrawActive, "No active draw in progress");
         require(areValidNumbers(_winningNumbers), "Winning numbers must be between 0 and 45");
-        // Buscar a los ganadores con los números
-        address[] memory myWinners  = findWinners(currentDrawId, _winningNumbers); // Inicializar como dirección nula
 
+        // Buscar a los ganadores
+        address[] memory myWinners  = findWinners(currentDrawId, _winningNumbers);
+
+        // Actualizar el estado antes de transferir fondos
         draws[currentDrawId] = Draw({
             winningNumbers: _winningNumbers,
             drawDate: block.timestamp,
             winners : myWinners
         });
 
-        //transfiere los fondos
+        emit DrawDone(currentDrawId, block.timestamp, _winningNumbers, myWinners);
+
         if (myWinners.length > 0) {
-            uint256 prize = primaryPotValue / myWinners.length;
+            uint256 prize = primaryPot / myWinners.length;
             for (uint32 i = 0; i < myWinners.length; i++) {
+                // Transferir después de actualizar el estado
                 (bool success, ) = myWinners[i].call{value: prize}("");
                 require(success, "Transfer to winner failed");
             }
-            primaryPotValue = 0; // Reset primary pot after distribution
+
+            // Resetear el primaryPot después de la transferencia
+            adjustPots();
         }
 
-        //falta ajustar los pozo para el siguiente sorteo
-        emit DrawDone(currentDrawId, block.timestamp, _winningNumbers, myWinners);
+        isDrawActive = false;
+        currentDrawId++;
     }
 
     // Function to see the result of a draw
@@ -96,11 +109,11 @@ contract QuiniBlockContract is Ownable, Pausable, QuiniBlockUtils {
         return draws[_drawId];
     }
 
-    // Function to set contract info
-    function setPotValues(uint256 _primaryPotValue, uint256 _secondaryPotValue) public onlyOwner {
-        primaryPotValue = _primaryPotValue;
-        secondaryPotValue = _secondaryPotValue;
-        emit SetPotValues(primaryPotValue, secondaryPotValue);
+    // Function to set el precio de ticketen wei
+    function setTicketPrice(uint256 _ticketPriceInWei) public onlyOwner {
+        require(_ticketPriceInWei > 0, "El precio del ticket debe ser mayor que 0");
+        ticketPrice = _ticketPriceInWei;
+        emit SetTicketPrice(_ticketPriceInWei);
     }
 
     // Function to get the chosen numbers of a ticket
@@ -112,9 +125,9 @@ contract QuiniBlockContract is Ownable, Pausable, QuiniBlockUtils {
     function findWinners(uint32 _drawId, uint32[6] memory _winningNumbers) private view returns (address[] memory) {
         address[] memory tempWinners = new address[](ticketCount);
         uint32 winnerCount = 0;
-
+        uint32[6] memory _winningOrderNumbers = orderNumbers(_winningNumbers);
         for (uint32 i = 0; i < ticketCount; i++) {
-            if (tickets[i].drawId == _drawId && compareNumbers(tickets[i].chosenNumbers, _winningNumbers)) {
+            if (tickets[i].drawId == _drawId && compareNumbers(tickets[i].chosenNumbers, _winningOrderNumbers)) {
                 tempWinners[winnerCount] = tickets[i].buyer;
                 winnerCount++;
             }
@@ -128,13 +141,37 @@ contract QuiniBlockContract is Ownable, Pausable, QuiniBlockUtils {
         return winners;
     }
 
-    // Function to pause the contract
-    function pause() public onlyOwner {
-        _pause();
+    // Function function to end the draw in failed situations
+    function emergencyResetDraw() public onlyOwner {
+        isDrawActive = false;
     }
 
-    // Function to unpause the contract
-    function unpause() public onlyOwner {
-        _unpause();
+    function getContractState() public view returns  (
+        uint256 _ticketPrice,
+        uint32 _ticketCount,
+        bool _isDrawActive,
+        bool _isContractPaused,
+        uint32 _currentDrawId,
+        uint256 _primaryPot,
+        uint256 _secondaryPot,
+        uint256 _reservePot,
+        uint256 _balance,
+        uint256 _basePotValue,
+        address _owner
+    ) {
+        return (
+            ticketPrice,
+            ticketCount,
+            isDrawActive,
+            _isContractPaused,
+            currentDrawId,
+            primaryPot,
+            secondaryPot,
+            reservePot,
+            address(this).balance, // Balance del contrato
+            basePotValue,
+            owner()
+        );
     }
+
 }

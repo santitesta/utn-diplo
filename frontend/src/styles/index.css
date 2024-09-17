@@ -1,0 +1,134 @@
+@import url("https://fonts.googleapis.com/css2?family=Raleway:wght@500&display=swap");
+body {
+  margin: 0;
+  font-family: "Raleway", serif !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-image: linear-gradient(to left, rgb(27 20 41), rgb(20 15 35));
+}
+
+
+
+.avatar {
+  background-color: #893d8b;
+  border-radius: 100%;
+  height: 38px;
+  width: 38px;
+  margin: 1%;
+}
+
+button {
+  background-color: #c770f0;
+  border-color: #d770f0;
+  border-radius: 10px;
+  border: 1px solid #d770f0;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  height: 38px;
+  line-height: 38px;
+  padding: 0 20px;
+  transition: background-color 0.2s;
+}
+button:hover {
+  background-color: #cf59ec;
+}
+button:disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.container-conection {
+  background-color: #202127;
+  border-radius: 8px;
+  border: 1px solid #2e2e32;
+  padding: 16px;
+  margin: 16px;
+  width: auto;
+}
+
+.container-card {
+  background-color: #202127;
+  border-radius: 8px;
+  border: 1px solid #2e2e32;
+  margin: 16px;
+  width: auto;
+}
+
+.container-card > *.card-header{
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  background-color: rgb(10, 4, 22);
+  padding: 12px;
+}
+
+.inline {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
+@media screen and (max-width: 600px) {
+  .inline {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+}
+
+input {
+  background-color: rgba(255, 255, 255, 0.075);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  color: #ffffff;
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  height: 38px;
+  line-height: 38px;
+  padding: 0 20px;
+  transition: background-color 0.2s;
+}
+
+.text {
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.row {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+@media screen and (max-width: 600px) {
+  .row {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+.set {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center; /* Centra los botones horizontalmente */
+}
+
+@media screen and (max-width: 600px) {
+  .set {
+    flex-direction: column;
+  }
+}
+
+.subtext {
+  opacity: 0.7;
+  font-weight: 400;
+  font-size: 12px;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
