@@ -21,6 +21,7 @@ window.CONTRACT_ADDRESS= '0x8c65ee76addbef9b2342e9bc2f759e6a7f894d63'; //contrat
 window.URL_BACKEND= 'http://127.0.0.1:5000';
 window.CHAIN_ID = 80002;
 window.TX_SCAN = 'https://amoy.polygonscan.com/tx';
+window.SYMBOL =config.chains[0].nativeCurrency.symbol;
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

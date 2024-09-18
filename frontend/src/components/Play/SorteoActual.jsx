@@ -11,14 +11,12 @@ import {
     useComprarTicket ,
 } from '../../services/comprarTicketService';
 
-import useContractInfo from "../../hooks/useContractInfo";
 //icono
 import { GiPerspectiveDiceSixFacesRandom } from "react-icons/gi";
 
 
-function SorteoActual({ sorteoID }) {
+function SorteoActual({ sorteoID, estadoContrato }) {
     const { isConnected, address } = useAccount();
-    const { estadoContrato} = useContractInfo();
     const precio = estadoContrato?.contrato.ticketPrice;
     const count = 6;
     const [numeros, setNumeros] = useState(Array(count).fill(null));
@@ -116,7 +114,7 @@ function SorteoActual({ sorteoID }) {
                             type="submit"  
                             disabled={(isPending && !isSuccess && !errorMessage)?true:false}
                             >
-                                Comprar Ticket ({precio})
+                                Comprar Ticket ({precio} {window.SYMBOL})
                         </Button>
                         </>
                         : 

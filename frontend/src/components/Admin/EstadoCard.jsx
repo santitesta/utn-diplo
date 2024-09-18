@@ -18,7 +18,7 @@ function EstadoCard({ estadoContrato, isConnected }) {
   }, [estadoContrato,isFirstPrecio]);
 
   const handleSavePrecio = () => {
-      console.log(`Precio Actualizado ${precio}ETH`);
+      console.log(`Precio Actualizado ${precio} ${window.SYMBOL}`);
     };
 
   const handleCancel = () => {
@@ -42,7 +42,7 @@ function EstadoCard({ estadoContrato, isConnected }) {
           buttonIcon = {AiFillTool}
         >
           <Form.Group className="mb-3" controlId="formBasicEmail">
-            <Form.Label>Nuevo Precio [ETH]:</Form.Label>
+            <Form.Label>Nuevo Precio [{window.SYMBOL}]:</Form.Label>
             <NumberInput
               placeholder="Precio Del Ticket"
               value={precio}
@@ -54,7 +54,7 @@ function EstadoCard({ estadoContrato, isConnected }) {
       </Card.Header>
       <Card.Body>
           <p>Tickets Vendidos: {estadoContrato?.contrato.contadorTicket}</p>
-          <p>Ticket Precio: {estadoContrato?.contrato.ticketPrice} ETH</p>
+          <p>Ticket Precio: {estadoContrato?.contrato.ticketPrice} {window.SYMBOL}</p>
           <p>Numeros de sorteos: {estadoContrato?.sorteo.numero}</p>
       </Card.Body>
     </Card>

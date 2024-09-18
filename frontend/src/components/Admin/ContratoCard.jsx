@@ -19,7 +19,7 @@ function ContratoCard({ estadoContrato, isPaused }) {
     }, [estadoContrato,isFirstPrecio]);
 
     const handleSavePrecio = () => {
-        console.log(`Precio Actualizado ${precio}ETH`);
+        console.log(`Precio Actualizado ${precio} ${window.SYMBOL}`);
       };
 
       const handleCancel = () => {
@@ -62,7 +62,7 @@ function ContratoCard({ estadoContrato, isPaused }) {
                 handleShow= {()=>setIsContratoDialogActivo(true)}
                 >
                 <Form.Group className="mb-3" controlId="formBasicEmail">
-                    <Form.Label>Pozo Base [ETH]:</Form.Label>
+                    <Form.Label>Pozo Base [{window.SYMBOL}]:</Form.Label>
                     <NumberInput
                     placeholder="Precio del pozo base"
                     value={precio}
@@ -73,8 +73,8 @@ function ContratoCard({ estadoContrato, isPaused }) {
             </Card.Header>
             <Card.Body>
                 <p>Estado : <span className="bg-success text-white p-2">Runing</span> </p>
-                <p>Balance: {estadoContrato?.contrato.balance} ETH</p>
-                <p>Pozo Base: {estadoContrato?.contrato.basePot} ETH</p>
+                <p>Balance: {estadoContrato?.contrato.balance} {window.SYMBOL}</p>
+                <p>Pozo Base: {estadoContrato?.contrato.basePot} {window.SYMBOL}</p>
             </Card.Body>
         </Card>
     )

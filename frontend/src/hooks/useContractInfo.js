@@ -37,7 +37,7 @@ const useContractInfo = () => {
     };
 
     requestInformation();
-    const intervalId = setInterval(requestInformation, 10000); //Refresco cada 10 segundos
+    const intervalId = setInterval(requestInformation, 10000); //Refresco cada 1 segundos
     return () => clearInterval(intervalId);
   }, [pozo]);
 

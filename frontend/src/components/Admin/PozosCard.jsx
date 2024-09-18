@@ -56,7 +56,7 @@ function PozosCard({ estadoContrato, isConnected }) {
           buttonIcon={AiFillTool}
         >
           <Form.Group className="mb-3" controlId="formBasicPrimario">
-            <Form.Label>Pozo Primario [ETH]:</Form.Label>
+            <Form.Label>Pozo Primario [{window.SYMBOL}]:</Form.Label>
             <NumberInput
               placeholder="Pozo Primario"
               value={pozos[0]}
@@ -64,7 +64,7 @@ function PozosCard({ estadoContrato, isConnected }) {
             />
           </Form.Group>
           <Form.Group className="mb-3" controlId="formBasicSecundario">
-            <Form.Label>Pozo Secundario [ETH]:</Form.Label>
+            <Form.Label>Pozo Secundario [{window.SYMBOL}]:</Form.Label>
             <NumberInput
               placeholder="Pozo Secundario"
               value={pozos[1]}
@@ -72,7 +72,7 @@ function PozosCard({ estadoContrato, isConnected }) {
             />
           </Form.Group>
           <Form.Group className="mb-3" controlId="formBasicReserva">
-            <Form.Label>Pozo Reserva [ETH]:</Form.Label>
+            <Form.Label>Pozo Reserva [{window.SYMBOL}]:</Form.Label>
             <NumberInput
               placeholder="Pozo Reserva"
               value={pozos[2]}
@@ -83,7 +83,7 @@ function PozosCard({ estadoContrato, isConnected }) {
           <Row>
             <Col>
               <Form.Group className="mb-3" controlId="formBasicBalance">
-                <Form.Label>Balance del Contrato [ETH]:</Form.Label> 
+                <Form.Label>Balance del Contrato [{window.SYMBOL}]:</Form.Label> 
                 <Form.Control
                   type="text"
                   placeholder="Balance del contrato"
@@ -95,7 +95,7 @@ function PozosCard({ estadoContrato, isConnected }) {
             </Col>
             <Col>
               <Form.Group className="mb-3" controlId="formBasicSuma">
-                <Form.Label>Suma Seteada [ETH]:</Form.Label> 
+                <Form.Label>Suma Seteada [{window.SYMBOL}]:</Form.Label> 
                 <Form.Control
                   type="text"
                   placeholder="Suma Seteada"
@@ -110,9 +110,9 @@ function PozosCard({ estadoContrato, isConnected }) {
         </PersonalizedDialog>          
       </Card.Header>
       <Card.Body>
-        <p>Primario: {estadoContrato?.pozo.primario} ETH</p>
-        <p>Secundario: {estadoContrato?.pozo.secundario} ETH</p>
-        <p>Reserva: {estadoContrato?.pozo.reserva} ETH</p>
+        <p>Primario: {estadoContrato?.pozo.primario} {window.SYMBOL}</p>
+        <p>Secundario: {estadoContrato?.pozo.secundario} {window.SYMBOL}</p>
+        <p>Reserva: {estadoContrato?.pozo.reserva} {window.SYMBOL}</p>
       </Card.Body>
     </Card>
   );

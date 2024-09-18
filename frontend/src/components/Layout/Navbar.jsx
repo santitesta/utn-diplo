@@ -17,7 +17,7 @@ import { useAccount } from 'wagmi';
 import useContractInfo from "../../hooks/useContractInfo";
 
 function NavBar() {
-  const { address } = useAccount();
+  const { isConnected,address } = useAccount();
   const { owner } = useContractInfo();
   const [expand, updateExpanded] = useState(false);
   const [navColour, updateNavbar] = useState(false);
@@ -103,16 +103,18 @@ function NavBar() {
                 <AiFillIdcard  style={{ marginBottom: "2px" }} /> Membresias
               </Nav.Link>
             </Nav.Item> */}
-
-            <Nav.Item>
-              <Nav.Link
-                as={Link}
-                to="/history"
-                onClick={() => updateExpanded(false)}
-              >
-                <CgFileDocument style={{ marginBottom: "2px" }} /> Historial
-              </Nav.Link>
-            </Nav.Item>
+            {/* AL CONECTARME VEO EL HISTORIAL */}
+            {isConnected &&
+              <Nav.Item>
+                <Nav.Link
+                  as={Link}
+                  to="/history"
+                  onClick={() => updateExpanded(false)}
+                >
+                  <CgFileDocument style={{ marginBottom: "2px" }} /> Historial
+                </Nav.Link>
+              </Nav.Item>
+            }
 
 
             <Nav.Item className="fork-btn">

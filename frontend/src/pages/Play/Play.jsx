@@ -12,7 +12,7 @@ function Play() {
       <Container fluid className="resume-section">
         {pozo && <BannerPozo pozo={pozo} className="me-2"/> }
         {estadoContrato && <UltmoSorteo sorteo={estadoContrato.sorteo.anterior} />}
-        <SorteoActual  sorteoID={currentDraw}/>
+        <SorteoActual  sorteoID={currentDraw} estadoContrato={estadoContrato}/>
       </Container>
     </div>
   );

@@ -30,9 +30,9 @@ const LotteryJackpot = ({ className, pozo }) => {
             />
           );
         })}
-        <DigitBox value="E" className="gold"/>
-        <DigitBox value="T" className="gold"/>
-        <DigitBox value="H" className="gold"/>
+        {window.SYMBOL.split('').map((char, index) => (
+          <DigitBox key={index} value={char} className="gold" />
+        ))}
         <div className="lottery-title">Pozo en Juego:</div>
       </div>
     </div>

@@ -17,6 +17,7 @@ const projectId = 'ecdd81a82c458b86628c0d3e48e6171c';
 // //configuro para usar localhost Ganache
 const myPolygonAmoy = {
     ...polygonAmoy,
+    nativeCurrency: { name: 'POL', symbol: 'POL', decimals: 18 }, //Corrigiendo a POL
     rpcUrls: {
       default: { http: ['https://rpc-amoy.polygon.technology'] }, // Cambiado a 7545
     },
