@@ -24,7 +24,7 @@ function Admin() {
         {!isOwner &&<div className="bg-danger"> NO ES OWNER </div>}
         <Row className="m-2">
           <Row>
-            <Col className="col-xl-5 col-lg-6">
+            {/* <Col className="col-xl-5 col-lg-6"> */}
               <Row>
                 <Col className="col-sm-6">
                     <SorteoCard 
@@ -52,10 +52,10 @@ function Admin() {
                 </Col>
               </Row>
 
-            </Col>
-            <Col className="col-xl-7 col-lg-6">
+            {/* </Col> */}
+            {/* <Col className="col-xl-7 col-lg-6">
               <LotteryChart />
-            </Col>
+            </Col> */}
           </Row>
         </Row>
       </Container>

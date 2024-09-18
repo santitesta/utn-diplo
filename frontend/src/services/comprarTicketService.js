@@ -16,8 +16,8 @@ export function useComprarTicket() {
     // const [enConfirmacion, setEnConfirmacion] = useState(false);
     const [ticketID, setTicketID] = useState(null);
     const [isPending, setIsPending] = useState(false);
-    const { data: hash, writeContract, error ,isError,isPending:wcPending ,isSuccess} = useWriteContract(config);
-    const {isSuccess:wftSuccess, isPending:wftPending}= useWaitForTransactionReceipt({ hash, config });
+    const { data: hash, writeContract, error ,isError,isPending:wcPending ,isSuccess:wcSuccess} = useWriteContract(config);
+    const {isSuccess, isPending:wftPending}= useWaitForTransactionReceipt({ hash, config }); //el success es mejor si usa el de la configrmacion de tx
     const [returnedTicketID, setReturnedTicketID] = useState(null);
     const [transactionHash, setTransactionHash] = useState(null);
     const [errorMessage  , setErrorMessage ] = useState(null);
@@ -88,5 +88,5 @@ export function useComprarTicket() {
         
     };
 
-    return { comprarTicket, returnedTicketID, isSuccess, isPending, hash,isError, errorMessage,wftSuccess,wftPending };
+    return { comprarTicket, returnedTicketID, isSuccess, isPending, hash,isError, errorMessage };
 }

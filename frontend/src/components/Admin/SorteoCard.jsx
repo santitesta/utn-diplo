@@ -19,8 +19,6 @@ function SorteoCard({ estadoContrato, isConnected }) {
   const { inicializarSorteo, returnedSorteoID:newSorteoId, isSuccess:iisSuccess, isPending:iisPending, hash:ihash,isError:iisError, errorMessage:ierrorMessage } = useInicializarSorteo();
   const { finalizarSorteo, returnedWinners:freturnedWinners, isSuccess:fisSuccess, isPending:fisPending, hash:fhash,isError:fisError, errorMessage:ferrorMessage } = useFinalizarSorteo();
 
-  //const [newSorteoId, setnewSorteoId] = useState(null);
-
   useEffect(() => {
     if (estadoContrato) {
       const { contrato } = estadoContrato;
@@ -57,10 +55,10 @@ function SorteoCard({ estadoContrato, isConnected }) {
 
     if (fisSuccess && sumaTotal > 0 && freturnedWinners) {
       alert(`Se finalizó el sorteo. Ganadores números: [${numerosGanadores}].`);
-
+      let numerosOrdenados = [...numerosGanadores].sort((a, b) => a - b);
       axios.put(`${window.URL_BACKEND}/sorteos/finalizar`, {
         drawId: estadoContrato.sorteo.numero, 
-        numerosGanadores: numerosGanadores,
+        numerosGanadores: numerosOrdenados,
         pozoSorteado: estadoContrato.pozo.primario,
         cantGanadores: freturnedWinners.length,
         maxNroTicket: (estadoContrato.contrato.contadorTicket -1), //en estado esta el numero que se va a agregar al contrato o proximo id
@@ -163,6 +161,7 @@ function SorteoCard({ estadoContrato, isConnected }) {
                   <Col xs sm="6" md="2" className="d-flex justify-content-center p-1" key={index}>
                      <NumberInput
                         placeholder={`#${index + 1}`}
+                        id= {`#${index + 1}`}
                         value={numerosGanadores[index] || ''}
                         onChange={(value) =>handleInputChange(index,value)}
                         className={` ${!validityState[index] ? 'is-invalid' : ''}`}

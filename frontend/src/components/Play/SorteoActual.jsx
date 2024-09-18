@@ -21,10 +21,20 @@ function SorteoActual({ sorteoID, estadoContrato }) {
     const count = 6;
     const [numeros, setNumeros] = useState(Array(count).fill(null));
     const [registroID, setRegistroID] = useState(null);
+    const [isSorteoActivo, setIsSorteoActivo] = useState(false);
     const { comprarTicket, returnedTicketID:ticketID ,isSuccess,hash ,errorMessage,isPending,isError } = useComprarTicket();
 
+    useEffect(() => {
+        if (estadoContrato) {
+          const { contrato } = estadoContrato;
+          const estado = contrato?.isDrawActive ? contrato.isDrawActive : false;
+          setIsSorteoActivo(estado);
+          console.log('estado',estado);
+        }
+    }, [estadoContrato]);
+
     const handleComprarTicket = async () => {
-        console.log(`Trata de comprar ticket con números [${numeros}]`);
+        if(window.TEST) console.log(`Trata de comprar ticket con números [${numeros}]`);
         let numerosOrdenados = [...numeros].sort((a, b) => a - b);
         if (isConnected && precio> 0) {
             const response = await axios.post(`${window.URL_BACKEND}/registrarCompra`, {
@@ -33,10 +43,10 @@ function SorteoActual({ sorteoID, estadoContrato }) {
                 ownerAddress: address
             });
             setRegistroID(response.data.id);
-            console.log("Respuesta de la API:", response.data);
+            if(window.TEST) console.log("Respuesta de la API:", response.data);
             comprarTicket(`${window.CONTRACT_ADDRESS}`, numerosOrdenados, precio);
         } else {
-            console.log("Sin conexión.");
+            if(window.TEST) console.log("Sin conexión.");
             alert('No esta conectado a su wallet')
         }
     };
@@ -45,8 +55,8 @@ function SorteoActual({ sorteoID, estadoContrato }) {
         const array_nulo = Array(count).fill(null);
         if (isSuccess && ticketID > 0 && numeros !== array_nulo) {
             const estado = isSuccess ? 'confirmada' : 'fallida';
-            console.log(`tx [${registroID}]=> ticketID[${ticketID}] => [${estado}]=>hash [${hash}]`);
-            alert(`Se compró ticket[${ticketID}] con números [${numeros}]. Me falta generar el historial`);
+            if(window.TEST) console.log(`tx [${registroID}]=> ticketID[${ticketID}] => [${estado}]=>hash [${hash}]`);
+            alert(`Se compró ticket[${ticketID}] con números [${numeros}].`);
             axios.put(`${window.URL_BACKEND}/actualizarCompra/${registroID}`, {
                 txHash: hash,
                 estado: estado,
@@ -112,7 +122,8 @@ function SorteoActual({ sorteoID, estadoContrato }) {
                         <Button 
                             variant="primary" 
                             type="submit"  
-                            disabled={(isPending && !isSuccess && !errorMessage)?true:false}
+                            disabled={ !isSorteoActivo || (isPending && !isSuccess && !errorMessage)?true:false}
+                            // deshabilitado si no hay sorteo activo o esta pendiente una tx
                             >
                                 Comprar Ticket ({precio} {window.SYMBOL})
                         </Button>

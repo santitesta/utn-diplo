@@ -13,20 +13,13 @@ const abi = myAbiJson.abi;
 export function useFinalizarSorteo() {
     const [winners, setWinners] = useState([]);
     const [isPending, setIsPending] = useState(false);
-    const { data: hash, writeContract, error ,isError,isPending:wcPending ,isSuccess} = useWriteContract(config);
-    const {isSuccess:wftSuccess, isPending:wftPending}= useWaitForTransactionReceipt({ hash, config });
-    const wft= useWaitForTransactionReceipt({ hash, config });
+    const { data: hash, writeContract, error ,isError,isPending:wcPending ,isSuccess:wcisSuccess} = useWriteContract(config);
+    const {isSuccess, isPending:wftPending}= useWaitForTransactionReceipt({ hash, config });
 
     const [returnedWinners, setReturnedWinners] = useState([]);
     const [transactionHash, setTransactionHash] = useState(null);
     const [errorMessage  , setErrorMessage ] = useState(null);
 
-    // useEffect(() => {
-    //     if(wft.data){
-    //         console.log('wft finalizar',wft);
-    //     }
-    // },[wft]);
-    //logica de pendiente
     useEffect(() => {
         //inicia cuando mando a firmar la tx
         if(wcPending && !isPending)
@@ -66,7 +59,7 @@ export function useFinalizarSorteo() {
    
     useEffect(() => {
         if(isError){
-            setReturnedWinners([0x00]);
+            setReturnedWinners(['0x00']);
             setErrorMessage(error);
         }
     }, [error,isError]);

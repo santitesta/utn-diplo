@@ -47,13 +47,14 @@ function CardTicket({ count, title,header, handleButton, numeros, setNumeros, er
         //{ hash, title, children, error , isPending, isConfirmed}
         <CardWaitForTx  error ={error} isPending ={isPending}  isConfirmed = {isConfirmed} title={title}>
             <Form className="p-1" onSubmit={handleSubmit}>
-                <Form.Group className="mb-3" controlId="ticketBuy">
+                <Form.Group className="mb-3">
                     <Form.Label>{header}</Form.Label>
                     <Row>
                         {[...Array(count)].map((_, index) => (
                             <Col xs sm="6" md="2" className="d-flex justify-content-center p-1" key={index}>
                                 <Form.Control
                                     type="text"
+                                    id={`ticketBuy-${index}`} // Id único para cada campo basado en el índice
                                     placeholder={`#${index + 1}`}
                                     value={numeros[index] || ''} // Muestra el valor actual
                                     onChange={(e) => handleInputChange(index, parseInt(e.target.value, 10))} // Actualiza el estado de numeros
