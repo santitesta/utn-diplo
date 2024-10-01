@@ -7,11 +7,12 @@ import useContractInfo from "../../hooks/useContractInfo";
 
 function Play() {
   const { estadoContrato,  pozo, currentDraw } = useContractInfo();
+  const sorteAnterior= estadoContrato?estadoContrato.sorteo.anterior:null;
   return (
     <div>
       <Container fluid className="resume-section">
-        {pozo && <BannerPozo pozo={pozo} className="me-2"/> }
-        {estadoContrato && <UltmoSorteo sorteo={estadoContrato.sorteo.anterior} />}
+        <BannerPozo pozo={pozo} className="me-2"/>
+        <UltmoSorteo sorteo={sorteAnterior} />
         <SorteoActual  sorteoID={currentDraw} estadoContrato={estadoContrato}/>
       </Container>
     </div>

@@ -51,7 +51,7 @@ const BannerPozo = ({pozo}) => {
       <Container className="content">
         <Row className="justify-content-center align-items-center">
           <Col xs={12} md={6}>
-            <LotteryJackpot pozo={parseFloat(pozo)}/>
+            <LotteryJackpot pozo={pozo?parseFloat(pozo):0.00}/>
           </Col>
           <Col xs={12} md={6} className="text-section">
             <h1>QuiniBlock</h1>

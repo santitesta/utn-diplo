@@ -11,7 +11,7 @@ import myAbiJson from './abi_contracts/QuiniBlockContract.sol/QuiniBlockContract
 const abi = myAbiJson.abi;
 
 export function useFinalizarSorteo() {
-    const [winners, setWinners] = useState([]);
+    const [winners, setWinners] = useState(null);
     const [isPending, setIsPending] = useState(false);
     const { data: hash, writeContract, error ,isError,isPending:wcPending ,isSuccess:wcisSuccess} = useWriteContract(config);
     const {isSuccess, isPending:wftPending}= useWaitForTransactionReceipt({ hash, config });
@@ -20,11 +20,14 @@ export function useFinalizarSorteo() {
     const [transactionHash, setTransactionHash] = useState(null);
     const [errorMessage  , setErrorMessage ] = useState(null);
 
+    const [isEnd,setIsEnd] = useState(false);
+
     useEffect(() => {
         //inicia cuando mando a firmar la tx
         if(wcPending && !isPending)
         {   
             setIsPending(true);
+            
         }
         // luego se mantiene hasta que finaliza la confirmacion o falla
         if(isPending && !wftPending || isError)
@@ -42,20 +45,22 @@ export function useFinalizarSorteo() {
       onLogs(logs) {
         if(logs[0].eventName == "DrawDone"){
             setTransactionHash(logs[0].transactionHash)
+            console.log(`se setean winners [${logs[0].args.winners.toString()}]`);
             setWinners(logs[0].args.winners.toString()); 
+            setIsEnd(true);
         }
       },
     })
 
     useEffect(() => {
-        if(transactionHash&&winners&&hash)
+        if(transactionHash&&winners&&hash&&isEnd)
         {
             if(hash.toUpperCase() == transactionHash.toUpperCase())
             {
                 setReturnedWinners(winners);
             }
         }
-    }, [hash,winners,transactionHash]);
+    }, [hash,winners,transactionHash,isEnd]);
    
     useEffect(() => {
         if(isError){
@@ -66,6 +71,8 @@ export function useFinalizarSorteo() {
     
 
     const finalizarSorteo = async (address, numerosGanadores)=> {
+        setWinners(null); //me aseguro que este en vacio
+        setIsEnd(false);
         let numerosOrdenados = [...numerosGanadores].sort((a, b) => a - b);
         try {
             await writeContract({

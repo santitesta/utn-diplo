@@ -5,7 +5,7 @@ import BingoBall from './BingoBall';
 export default function UltimoSorteo({ sorteo }) {
 
   //console.log(console.log(JSON.stringify(sorteo, null, 3)));
-  const cantidadGanadores = sorteo.winners.length;
+  const cantidadGanadores = sorteo?sorteo.winners.length:0;
 
 
   return (
@@ -14,11 +14,11 @@ export default function UltimoSorteo({ sorteo }) {
         <Card className='container-card' text='white'>
           <Card.Header as="h4">Resultados de la Ultima Jugada</Card.Header>
           <Card.Body>
-            <h6>Sorteo Numero: {sorteo.numero}</h6>
-            <h6>Fecha Sorteada: {sorteo.drawDate}</h6>
+            <h6>Sorteo Numero: {sorteo?sorteo.numero:0}</h6>
+            <h6>Fecha Sorteada: {sorteo?sorteo.drawDate:''}</h6>
 
             <Row className='pt-2'>
-              {sorteo.winningNumbers.map((num, index) => (
+              {sorteo&&sorteo.winningNumbers.map((num, index) => (
                 <BingoBall key={index} number={num} />
               ))}
             </Row>

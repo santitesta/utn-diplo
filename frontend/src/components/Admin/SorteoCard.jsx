@@ -17,7 +17,7 @@ function SorteoCard({ estadoContrato, isConnected }) {
   const [validityState, setValidityState] = useState(Array(count).fill(true));
 
   const { inicializarSorteo, returnedSorteoID:newSorteoId, isSuccess:iisSuccess, isPending:iisPending, hash:ihash,isError:iisError, errorMessage:ierrorMessage } = useInicializarSorteo();
-  const { finalizarSorteo, returnedWinners:freturnedWinners, isSuccess:fisSuccess, isPending:fisPending, hash:fhash,isError:fisError, errorMessage:ferrorMessage } = useFinalizarSorteo();
+  const { finalizarSorteo, returnedWinners:winnersAddress, isSuccess:fisSuccess, isPending:fisPending, hash:fhash,isError:fisError, errorMessage:ferrorMessage } = useFinalizarSorteo();
 
   useEffect(() => {
     if (estadoContrato) {
@@ -27,6 +27,10 @@ function SorteoCard({ estadoContrato, isConnected }) {
     }
   }, [estadoContrato]);
 
+  useEffect(() => {
+    if(fisError)
+      console.log(ferrorMessage)
+  }, [fisError]);
   useEffect(() => {
     const array_nulo = Array(count).fill(null);
     if (iisSuccess && !sorteoIniciado && newSorteoId>0) {
@@ -53,14 +57,16 @@ function SorteoCard({ estadoContrato, isConnected }) {
       .flat()
       .reduce((acc, num) => acc + num, 0);
 
-    if (fisSuccess && sumaTotal > 0 && freturnedWinners) {
-      alert(`Se finalizó el sorteo. Ganadores números: [${numerosGanadores}].`);
+    if (fisSuccess && sumaTotal > 0 && winnersAddress) {
+      alert(`Se finalizó el sorteo. Ganadores números: [${numerosGanadores}]. hubo [${winnersAddress.length}] ganadores`);
       let numerosOrdenados = [...numerosGanadores].sort((a, b) => a - b);
+      console.log('winnersAddress',winnersAddress);
       axios.put(`${window.URL_BACKEND}/sorteos/finalizar`, {
         drawId: estadoContrato.sorteo.numero, 
         numerosGanadores: numerosOrdenados,
         pozoSorteado: estadoContrato.pozo.primario,
-        cantGanadores: freturnedWinners.length,
+        cantGanadores: winnersAddress.length,
+        ganadores: winnersAddress,
         maxNroTicket: (estadoContrato.contrato.contadorTicket -1), //en estado esta el numero que se va a agregar al contrato o proximo id
       });
 
@@ -68,7 +74,7 @@ function SorteoCard({ estadoContrato, isConnected }) {
       setSorteoShow(false);
       setSorteoIniciado(false);
     }
-  }, [fisSuccess,freturnedWinners]);
+  }, [fisSuccess,winnersAddress]);
 
   const handleInputChange = (index, value) => {
     const newNumeros = [...numerosGanadores];
