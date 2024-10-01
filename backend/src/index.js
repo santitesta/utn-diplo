@@ -196,35 +196,6 @@ app.put('/actualizarCompra/:id', async (req, res) => {
     }
 });
 
-app.get('/estadoContratoEstatico', (req, res) => {
-    const staticData = {
-        contrato: {
-            owner: "0x0b433B0910f195eB323A3648Dec0a5290Ffd2fF2",
-            balance: "2.5",
-            basePot: "2.0",
-            ticketPrice: "1.0",
-            contadorTicket: "6"
-        },
-        sorteo: {
-            numero: "2",
-            anterior: {
-                numero: "2",
-                drawDate: "4/8/2024, 07:07:06",
-                winningNumbers: [7, 18, 19, 29, 32, 39],
-                winners: ["0x5ABBBB031ea0f2F1C26591E2698ff51943A760D6"]
-            }
-        },
-        pozo: {
-            primario: "2.0",
-            secundario: "4.7",
-            reserva: "0.3"
-        }
-    };
-
-    res.json(staticData);
-});
-
-
 app.get('/historial/:address', async (req, res) => {
     try {
         const { address } = req.params;
@@ -233,7 +204,7 @@ app.get('/historial/:address', async (req, res) => {
         const values = [
             address, 
         ];
-
+        
         connection.query(query, values, (err, results) => {
             if (err) {
                 console.error('Error al insertar los datos en la base de datos:', err);
@@ -241,11 +212,15 @@ app.get('/historial/:address', async (req, res) => {
                 return;
             }
 
+            const contractState = contract.getContractState();
+
             // `results.insertId` contiene el ID del registro insertado
             console.log('Transacción registrada correctamente:', results);
             res.status(200).json({
                 message: 'Historial de transacciones',
-                historial: results // Devolver el ID insertado
+                historial: results ,// Devolver el ID insertado
+                sorteo: contractState._currentDrawId,
+
             });
         });
     } catch (error) {
@@ -285,8 +260,8 @@ app.post('/sorteos/iniciar', async (req, res) => {
 
 app.put('/sorteos/finalizar', async (req, res) => {
     try {
-        const { drawId, numerosGanadores, pozoSorteado, cantGanadores,maxNroTicket } = req.body;
-
+        const { drawId, numerosGanadores, pozoSorteado,cantGanadores, ganadores, maxNroTicket } = req.body;
+        console.log(ganadores)
         // Verificar que se envíen los números ganadores y el ID del sorteo
         if (!drawId || !numerosGanadores) {
             return res.status(400).send('Se requiere drawId y numerosGanadores');

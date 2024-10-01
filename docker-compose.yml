@@ -55,17 +55,17 @@ services:
     networks:
       - app-network
 
-# React App Service
-  frontend:
-    build:
-      context: ./frontend           # Path to the React app Dockerfile
-      dockerfile: Dockerfile
-    ports:
-      - '3000:3000'                     # Port mapping for React app
-    depends_on:
-      - backend                     # Ensure Node server starts before React app
-    networks:
-      - app-network
+# # React App Service
+#   frontend:
+#     build:
+#       context: ./frontend           # Path to the React app Dockerfile
+#       dockerfile: Dockerfile
+#     ports:
+#       - '3000:3000'                     # Port mapping for React app
+#     depends_on:
+#       - backend                     # Ensure Node server starts before React app
+#     networks:
+#       - app-network
 
 # Networks Definition
 networks:
