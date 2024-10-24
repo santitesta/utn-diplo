@@ -12,14 +12,18 @@ Currently, two official plugins are available:
 My personal portfolio <a href="https://soumyajit.vercel.app/" target="_blank">soumyajit.tech</a> 
 
 # Como ejecutar el codigo? 
-# hay alguna libreria typescript que esta discontinuada(deprecated) por eso uso el legacy-peer-deps
-npm install --legacy-peer-deps
+## hay alguna libreria typescript que esta discontinuada(deprecated) por eso uso el legacy-peer-deps
+    npm install --legacy-peer-deps
 
+## Configuracion previa en el src/main.jsx con datos correspondiente
 
-y
+window.CONTRACT_ADDRESS= '0x481636196bb539bBc81A05F8a23c52F107f6b8d7';
+window.URL_BACKEND= 'http://127.0.0.1:3000';
 
-npm run dev
+## correr de consola
+    npm run dev
 
-# ProjectID use wallectconnect para lo cual genere un id, no se si tengo que darle permisos compartidos pero supongo que como esta configurado deberian loguearse
+# ProjectID 
+## usando wallectconnect para lo cual genere un id, no se si tengo que darle permisos compartidos pero supongo que como esta configurado deberian loguearse
 
 1. Get projectId from https://cloud.walletconnect.com
